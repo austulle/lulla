@@ -90,7 +90,7 @@ Live Activities can only be started from the app process.
 ```
 Core/      models, JSON store, wake-window table, predictor, snapshot, formatting
 Shared/    theme, App Intents, Live Activity attributes and sync, write path
-App/       SwiftUI app: Today, feed/diaper sheets, editor, history, settings, onboarding
+App/       SwiftUI app: Today, feed sheet, editor, history, settings, onboarding
 Widgets/   WidgetKit extension: widgets, controls, Live Activity
 Tests/     predictor and store tests
 ```
