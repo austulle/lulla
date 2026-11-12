@@ -43,7 +43,6 @@ struct SheetHost: View {
     var body: some View {
         switch sheet {
         case .feed: FeedSheet()
-        case .diaper: DiaperSheet()
         case .history: HistoryView()
         case .settings: SettingsView()
         case .edit(let e): EntryEditor(entry: e, isNew: false)

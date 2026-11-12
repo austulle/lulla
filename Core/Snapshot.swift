@@ -10,7 +10,12 @@ struct LullaSnapshot: Hashable, Sendable {
     var babyName: String
     var ageText: String
     var sleepStart: Date?
+    /// Count-up anchor and current pause for the running sleep / feed timers.
+    var sleepAnchor: Date?
+    var sleepPausedAt: Date?
     var feedStart: Date?
+    var feedAnchor: Date?
+    var feedPausedAt: Date?
     var feedSide: BreastSide?
     var awakeSince: Date?
     var prediction: NapPrediction?
@@ -22,10 +27,13 @@ struct LullaSnapshot: Hashable, Sendable {
     var todaySleep: TimeInterval
     var todayNaps: Int
     var todayFeeds: Int
-    var todayDiapers: Int
+    /// Longest single sleep that ended or is running today.
+    var todayLongest: TimeInterval
 
     var isAsleep: Bool { sleepStart != nil }
     var isFeeding: Bool { feedStart != nil }
+    var isSleepPaused: Bool { sleepPausedAt != nil }
+    var isFeedPaused: Bool { feedPausedAt != nil }
 
     var mood: Mood {
         if isFeeding { return .feeding }
@@ -54,10 +62,13 @@ struct LullaSnapshot: Hashable, Sendable {
         let dayStart = calendar.startOfDay(for: now)
         let today = DateInterval(start: dayStart, end: max(now, dayStart))
         let todays = data.entries(overlapping: today, now: now)
+        // Clip sleep that crosses midnight; pauses count against the clipped part.
         let sleepToday = todays.filter { $0.kind == .sleep }.reduce(0.0) { sum, e in
             let s = max(e.start, dayStart), t = min(e.end ?? now, now)
-            return sum + max(0, t.timeIntervalSince(s))
+            return sum + max(0, min(t.timeIntervalSince(s), e.duration(at: now)))
         }
+        let longest = todays.filter { $0.kind == .sleep && ($0.end ?? now) >= dayStart }
+            .map { $0.duration(at: now) }.max() ?? 0
         let napsToday = todays.filter {
             $0.kind == .sleep && $0.start >= dayStart && !predictor.isNightSleep($0)
         }.count
@@ -69,7 +80,11 @@ struct LullaSnapshot: Hashable, Sendable {
             babyName: profile?.displayName ?? "Baby",
             ageText: profile.map { Format.age(days: $0.ageInDays(at: now, calendar: calendar)) } ?? "",
             sleepStart: data.activeSleep?.start,
+            sleepAnchor: data.activeSleep?.timerAnchor,
+            sleepPausedAt: data.activeSleep?.pausedAt,
             feedStart: data.activeFeed?.start,
+            feedAnchor: data.activeFeed?.timerAnchor,
+            feedPausedAt: data.activeFeed?.pausedAt,
             feedSide: data.activeFeed?.side,
             awakeSince: awakeSince,
             prediction: prediction,
@@ -81,7 +96,7 @@ struct LullaSnapshot: Hashable, Sendable {
             todaySleep: sleepToday,
             todayNaps: napsToday,
             todayFeeds: todays.filter { $0.kind == .feed && $0.start >= dayStart }.count,
-            todayDiapers: todays.filter { $0.kind == .diaper && $0.start >= dayStart }.count
+            todayLongest: longest
         )
     }
 
@@ -94,7 +109,10 @@ struct LullaSnapshot: Hashable, Sendable {
     }
 
     var napPhrase: String {
-        if let s = sleepStart { return "Asleep for \(Format.duration(now.timeIntervalSince(s)))" }
+        if sleepStart != nil {
+            let slept = Format.duration(now.timeIntervalSince(sleepAnchor ?? now) - (sleepPausedAt.map { now.timeIntervalSince($0) } ?? 0))
+            return isSleepPaused ? "Sleep paused at \(slept)" : "Asleep for \(slept)"
+        }
         if isNightWaking { return "Night waking" }
         guard let p = prediction else { return "Log a sleep to see the next window" }
         switch p.phase(at: now) {

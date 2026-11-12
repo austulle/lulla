@@ -175,48 +175,6 @@ struct FeedSheet: View {
     }
 }
 
-// MARK: - Diaper
-
-struct DiaperSheet: View {
-    @Environment(LogModel.self) private var model
-    @Environment(\.dismiss) private var dismiss
-    @State private var time = Date()
-
-    var body: some View {
-        SheetFrame(title: "Diaper") {
-            HStack(spacing: 10) {
-                ForEach(DiaperKind.allCases, id: \.self) { kind in
-                    Button {
-                        model.mutate { $0.add(.diaper(kind, at: time)) }
-                        dismiss()
-                    } label: {
-                        VStack(alignment: .leading, spacing: 16) {
-                            Image(systemName: symbol(kind)).font(.system(size: 20, weight: .light))
-                            Text(kind.title).font(.system(size: 15, weight: .medium))
-                        }
-                        .foregroundStyle(Color.lullaInk)
-                        .padding(14)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.lullaInk.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
-                    }
-                    .buttonStyle(.plain)
-                }
-            }
-            DatePicker("Time", selection: $time, in: ...Date().addingTimeInterval(300))
-                .font(.system(size: 15))
-        }
-        .presentationDetents([.height(300)])
-    }
-
-    private func symbol(_ k: DiaperKind) -> String {
-        switch k {
-        case .wet: "drop"
-        case .dirty: "circle.fill"
-        case .mixed: "circle.lefthalf.filled"
-        }
-    }
-}
-
 // MARK: - Edit / add
 
 struct EntryEditor: View {
@@ -242,7 +200,6 @@ struct EntryEditor: View {
         switch kind {
         case .sleep: return .sleep(start: now.addingTimeInterval(-3600), end: now)
         case .feed: return .breast(.left, start: now.addingTimeInterval(-15 * 60), end: now)
-        case .diaper: return .diaper(.wet, at: now)
         }
     }
 
@@ -294,13 +251,6 @@ struct EntryEditor: View {
                         case .solids:
                             DatePicker("Time", selection: $entry.start)
                         }
-                    }
-                case .diaper:
-                    Section {
-                        Picker("Type", selection: Binding(get: { entry.diaper ?? .wet }, set: { entry.diaper = $0 })) {
-                            ForEach(DiaperKind.allCases, id: \.self) { Text($0.title).tag($0) }
-                        }
-                        DatePicker("Time", selection: $entry.start)
                     }
                 }
 
@@ -370,8 +320,6 @@ struct EntryEditor: View {
                 e.side = nil
                 e.amountML = nil
             }
-        case .diaper:
-            e.end = e.start
         }
         model.mutate { $0.update(e) }
         dismiss()

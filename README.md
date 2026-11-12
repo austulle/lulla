@@ -1,6 +1,6 @@
 # Lulla
 
-A small native iOS app for tracking a baby's sleep, feeds and diapers.
+A small native iOS app for tracking a baby's sleep and feeds, with sleep first.
 It shows the next nap window, has widgets for the Home Screen and Lock
 Screen, controls for Control Center, Live Activities, and Siri / Shortcuts
 actions.
@@ -24,7 +24,7 @@ Signing uses team `Y3V978URTC` with bundle ids `com.lulla.baby` and
 ids, change all three in `project.yml` and set `LogStore.appGroup` to match.
 Xcode's automatic signing registers the App Group the first time you build.
 
-The core logic (`Core/`) is plain Foundation. Its 17 tests also run on Linux
+The core logic (`Core/`) is plain Foundation. Its 19 tests also run on Linux
 with SwiftPM: point a package target named `Lulla` at `Core/` and a test
 target at `Tests/`.
 
@@ -56,17 +56,26 @@ target at `Tests/`.
 The windows are estimates, not medical advice, and the app says so in
 Settings.
 
+## Timers
+
+Sleep and breastfeeding run as timers with **play**, **pause** and **stop**.
+A pause (a brief wake-up, burping) is left out of the duration. Stopping
+while paused ends the entry when the pause began. The paused time is saved
+on the entry (`pausedAt`, `pausedTotal`), and every count-up display uses
+`Text(timerInterval:pauseTime:)`, so the Lock Screen and Dynamic Island
+freeze while paused.
+
 ## Surfaces
 
 | Surface | Where |
 |---|---|
-| Home Screen widget, small and medium (with Sleep / Feed / Diaper buttons) | `Widgets/LullaWidget.swift` |
+| Home Screen widget, small and medium (play / pause / stop for sleep, and a feed button) | `Widgets/LullaWidget.swift` |
 | Lock Screen widgets: circular gauge to the next window, rectangular, inline | `Widgets/LullaWidget.swift` |
 | Control Center and Lock Screen corner controls: Sleep and Feed toggles | `Widgets/LullaWidgetBundle.swift` |
-| Live Activity and Dynamic Island for running sleep or feed timers, with buttons | `Widgets/LullaLiveActivity.swift` |
-| Siri phrases and Shortcuts actions (start/end sleep, start/stop feeding, log bottle, log diaper, next nap, last feed) | `Shared/Intents.swift`, `App/AppShortcuts.swift` |
+| Live Activity and Dynamic Island for running sleep or feed timers, with pause/resume and stop buttons | `Widgets/LullaLiveActivity.swift` |
+| Siri phrases and Shortcuts actions (start, pause/resume and end sleep; start, pause/resume and stop feeding; log bottle; next nap; last feed) | `Shared/Intents.swift`, `App/AppShortcuts.swift` |
 | Nap-window notification, sent N minutes before the window opens | `Shared/LullaActions.swift` (`NapAlerts`) |
-| Deep links: `lulla://feed`, `lulla://diaper`, `lulla://history` | `App/LullaApp.swift` |
+| Deep links: `lulla://feed`, `lulla://history` | `App/LullaApp.swift` |
 
 Every write goes through `LullaActions.perform` or `LogModel.mutate`. That
 path takes a file lock (`flock`) and does a read-modify-write of the shared

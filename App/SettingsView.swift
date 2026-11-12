@@ -60,10 +60,10 @@ struct SettingsView: View {
                 }
 
                 Section("Widgets, Siri & controls") {
-                    help("Home Screen", "Long-press the Home Screen → Edit → Add Widget → Lulla. The medium size has sleep and feed buttons.")
+                    help("Home Screen", "Long-press the Home Screen → Edit → Add Widget → Lulla. The medium size has play, pause and stop buttons for sleep, and a feed button.")
                     help("Lock Screen", "Long-press the Lock Screen → Customize → add Lulla to the widget row, and Lulla's Sleep or Feed control to the bottom corners.")
-                    help("Siri & Shortcuts", "Say “Start sleep in Lulla”, “Next nap in Lulla” or “Log a bottle in Lulla”. All actions are in the Shortcuts app and can go on the Action button.")
-                    help("Live Activity", "Running sleep and feeding timers appear on the Lock Screen and in the Dynamic Island.")
+                    help("Siri & Shortcuts", "Say “Start sleep in Lulla”, “Pause sleep in Lulla” or “Next nap in Lulla”. All actions are in the Shortcuts app and can go on the Action button.")
+                    help("Live Activity", "Running sleep and feeding timers appear on the Lock Screen and in the Dynamic Island, with pause, resume and stop buttons.")
                 }
 
                 Section("Data") {
@@ -143,18 +143,18 @@ struct CSVExport: Transferable {
         let iso = ISO8601DateFormatter()
         iso.formatOptions = [.withInternetDateTime]
         iso.timeZone = .current
-        var lines = ["type,start,end,duration_min,method,side,amount_ml,contents,diaper,note"]
+        var lines = ["type,start,end,duration_min,paused_min,method,side,amount_ml,contents,note"]
         for e in data.entries {
             let fields: [String] = [
                 e.kind.rawValue,
                 iso.string(from: e.start),
                 e.end.map { iso.string(from: $0) } ?? "",
-                e.end.map { String(Int(($0.timeIntervalSince(e.start) / 60).rounded())) } ?? "",
+                e.end.map { _ in String(Int((e.duration() / 60).rounded())) } ?? "",
+                e.pausedTotal.map { String(Int(($0 / 60).rounded())) } ?? "",
                 e.feedMethod?.rawValue ?? "",
                 e.side?.rawValue ?? "",
                 e.amountML.map { String(Int($0.rounded())) } ?? "",
                 e.bottleContent?.rawValue ?? "",
-                e.diaper?.rawValue ?? "",
                 (e.note ?? "").replacingOccurrences(of: "\"", with: "\"\""),
             ]
             lines.append(fields.map { $0.contains(",") || $0.contains("\"") || $0.contains("\n") ? "\"\($0)\"" : $0 }

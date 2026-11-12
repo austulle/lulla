@@ -18,17 +18,6 @@ enum SideOption: String, AppEnum {
     var side: BreastSide { self == .left ? .left : .right }
 }
 
-enum DiaperOption: String, AppEnum {
-    case wet, dirty, mixed
-
-    static let typeDisplayRepresentation: TypeDisplayRepresentation = "Diaper"
-    static let caseDisplayRepresentations: [DiaperOption: DisplayRepresentation] = [
-        .wet: "Wet", .dirty: "Dirty", .mixed: "Wet and dirty",
-    ]
-
-    var kind: DiaperKind { DiaperKind(rawValue: rawValue) ?? .wet }
-}
-
 enum BottleOption: String, AppEnum {
     case formula, breastMilk
 
@@ -109,6 +98,22 @@ struct SetSleepIntent: SetValueIntent, LiveActivityIntent {
     }
 }
 
+/// Play / pause for the running sleep timer.
+struct PauseSleepIntent: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Pause or Resume Sleep"
+    static let description = IntentDescription("Pauses the running sleep timer, or resumes it if paused.")
+
+    init() {}
+
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        var paused: Bool?
+        await LullaActions.perform { paused = $0.togglePause(.sleep, at: Date()) }
+        guard let paused else { return .result(dialog: "No sleep is running.") }
+        let message = paused ? "Sleep paused." : "Sleep resumed."
+        return .result(dialog: "\(message)")
+    }
+}
+
 // MARK: - Feeding
 
 struct StartBreastfeedingIntent: LiveActivityIntent {
@@ -147,6 +152,22 @@ struct StopFeedingIntent: LiveActivityIntent {
         guard let stopped else { return .result(dialog: "No feed is running.") }
         let unit = data.profile?.volumeUnit ?? .ml
         return .result(dialog: "Logged \(Format.feedLabel(stopped, unit: unit)). Next side: \(data.suggestedSide.title.lowercased()).")
+    }
+}
+
+/// Play / pause for the running feeding timer.
+struct PauseFeedingIntent: LiveActivityIntent {
+    static let title: LocalizedStringResource = "Pause or Resume Feeding"
+    static let description = IntentDescription("Pauses the running feeding timer, or resumes it if paused.")
+
+    init() {}
+
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        var paused: Bool?
+        await LullaActions.perform { paused = $0.togglePause(.feed, at: Date()) }
+        guard let paused else { return .result(dialog: "No feed is running.") }
+        let message = paused ? "Feeding paused." : "Feeding resumed."
+        return .result(dialog: "\(message)")
     }
 }
 
@@ -209,29 +230,6 @@ struct LogBottleIntent: AppIntent {
         }
         let ml = unit == .oz ? amount * VolumeUnit.mlPerOz : amount
         return .result(dialog: "Logged a \(Format.volume(ml: ml, unit: unit)) bottle.")
-    }
-}
-
-// MARK: - Diaper
-
-struct LogDiaperIntent: AppIntent {
-    static let title: LocalizedStringResource = "Log Diaper"
-    static let description = IntentDescription("Logs a diaper change.")
-
-    @Parameter(title: "Type")
-    var kind: DiaperOption
-
-    init() {}
-    init(kind: DiaperOption) { self.kind = kind }
-
-    static var parameterSummary: some ParameterSummary {
-        Summary("Log a \(\.$kind) diaper")
-    }
-
-    func perform() async throws -> some IntentResult & ProvidesDialog {
-        let diaper = kind.kind
-        await LullaActions.perform { $0.add(.diaper(diaper, at: Date())) }
-        return .result(dialog: "Diaper logged.")
     }
 }
 

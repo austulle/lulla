@@ -77,18 +77,17 @@ final class LogModel {
     }
 }
 
-/// Sheets and deep links (lulla://feed, lulla://sleep, lulla://diaper).
+/// Sheets and deep links (lulla://feed, lulla://history).
 @MainActor @Observable
 final class Router {
     enum Sheet: Identifiable, Equatable {
-        case feed, diaper, history, settings
+        case feed, history, settings
         case edit(Entry)
         case add(EntryKind)
 
         var id: String {
             switch self {
             case .feed: "feed"
-            case .diaper: "diaper"
             case .history: "history"
             case .settings: "settings"
             case .edit(let e): "edit-\(e.id)"
@@ -103,7 +102,6 @@ final class Router {
         guard url.scheme == "lulla" else { return }
         switch url.host() {
         case "feed": sheet = .feed
-        case "diaper": sheet = .diaper
         case "history": sheet = .history
         default: sheet = nil
         }

@@ -4,7 +4,7 @@ import Foundation
 // extension and the tests (and on Linux for the predictor tests).
 
 enum EntryKind: String, Codable, CaseIterable, Sendable {
-    case sleep, feed, diaper
+    case sleep, feed
 }
 
 enum FeedMethod: String, Codable, CaseIterable, Sendable {
@@ -25,21 +25,11 @@ enum BottleContent: String, Codable, CaseIterable, Sendable {
     var title: String { self == .formula ? "Formula" : "Breast milk" }
 }
 
-enum DiaperKind: String, Codable, CaseIterable, Sendable {
-    case wet, dirty, mixed
-
-    var title: String {
-        switch self {
-        case .wet: "Wet"
-        case .dirty: "Dirty"
-        case .mixed: "Wet + dirty"
-        }
-    }
-}
-
 /// One logged event. Timed events (sleep, breastfeeding) have `end == nil`
-/// while their timer runs; instant events (bottle, solids, diaper) have
-/// `end == start`.
+/// while their timer runs; instant events (bottle, solids) have
+/// `end == start`. A running timer can be paused: `pausedAt` marks the
+/// current pause and `pausedTotal` sums the finished ones, so the entry's
+/// duration counts only the time the timer actually ran.
 struct Entry: Codable, Identifiable, Hashable, Sendable {
     var id: UUID = UUID()
     var kind: EntryKind
@@ -49,14 +39,24 @@ struct Entry: Codable, Identifiable, Hashable, Sendable {
     var side: BreastSide?
     var amountML: Double?
     var bottleContent: BottleContent?
-    var diaper: DiaperKind?
     var note: String?
+    var pausedAt: Date?
+    var pausedTotal: TimeInterval?
 
     var isRunning: Bool { end == nil }
+    var isPaused: Bool { end == nil && pausedAt != nil }
 
+    /// Time the timer ran, excluding pauses.
     func duration(at now: Date = Date()) -> TimeInterval {
-        max(0, (end ?? now).timeIntervalSince(start))
+        let stop = end ?? now
+        var paused = pausedTotal ?? 0
+        if end == nil, let p = pausedAt { paused += max(0, now.timeIntervalSince(p)) }
+        return max(0, stop.timeIntervalSince(start) - paused)
     }
+
+    /// Start shifted by finished pauses: a count-up timer from here, frozen
+    /// at `pausedAt` while paused, shows the right elapsed time.
+    var timerAnchor: Date { start.addingTimeInterval(pausedTotal ?? 0) }
 
     static func sleep(start: Date, end: Date? = nil) -> Entry {
         Entry(kind: .sleep, start: start, end: end)
@@ -72,10 +72,6 @@ struct Entry: Codable, Identifiable, Hashable, Sendable {
 
     static func solids(at date: Date, note: String?) -> Entry {
         Entry(kind: .feed, start: date, end: date, feedMethod: .solids, note: note)
-    }
-
-    static func diaper(_ kind: DiaperKind, at date: Date) -> Entry {
-        Entry(kind: .diaper, start: date, end: date, diaper: kind)
     }
 }
 
@@ -166,7 +162,6 @@ extension LogData {
     }
 
     var lastFeed: Entry? { entries.last { $0.kind == .feed } }
-    var lastDiaper: Entry? { entries.last { $0.kind == .diaper } }
 
     var lastBreastSide: BreastSide? {
         entries.last { $0.kind == .feed && $0.feedMethod == .breast }?.side
@@ -212,8 +207,35 @@ extension LogData {
 
     @discardableResult
     mutating func endSleep(at date: Date) -> Entry? {
-        guard var e = activeSleep else { return nil }
-        e.end = max(date, e.start)
+        guard let e = activeSleep else { return nil }
+        return finish(e, at: date)
+    }
+
+    /// Pauses the running timer of `kind`, or resumes it if paused.
+    /// Returns true if the timer is now paused, nil if none is running.
+    @discardableResult
+    mutating func togglePause(_ kind: EntryKind, at date: Date) -> Bool? {
+        guard var e = kind == .sleep ? activeSleep : activeFeed else { return nil }
+        if let p = e.pausedAt {
+            e.pausedTotal = (e.pausedTotal ?? 0) + max(0, date.timeIntervalSince(p))
+            e.pausedAt = nil
+        } else {
+            e.pausedAt = max(date, e.start)
+        }
+        update(e)
+        return e.pausedAt != nil
+    }
+
+    /// Ends a timer. Stopping while paused ends it when the pause began,
+    /// so a pause that turns into "done" isn't counted.
+    private mutating func finish(_ entry: Entry, at date: Date) -> Entry {
+        var e = entry
+        if let p = e.pausedAt {
+            e.end = max(p, e.start)
+            e.pausedAt = nil
+        } else {
+            e.end = max(date, e.start)
+        }
         update(e)
         return e
     }
@@ -227,9 +249,7 @@ extension LogData {
 
     @discardableResult
     mutating func stopFeed(at date: Date) -> Entry? {
-        guard var e = activeFeed else { return nil }
-        e.end = max(date, e.start)
-        update(e)
-        return e
+        guard let e = activeFeed else { return nil }
+        return finish(e, at: date)
     }
 }

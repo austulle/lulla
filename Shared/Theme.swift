@@ -174,18 +174,30 @@ struct DashedRule: View {
     }
 }
 
+/// Count-up timer that excludes pauses and freezes while paused.
+struct ElapsedText: View {
+    let anchor: Date
+    var pausedAt: Date?
+
+    var body: some View {
+        Text(timerInterval: anchor...Date.distantFuture, pauseTime: pausedAt, countsDown: false)
+            .monospacedDigit()
+    }
+}
+
 enum LullaIcon {
     static let sleep = "moon.zzz"
     static let wake = "sun.max"
     static let feed = "drop"
     static let bottle = "waterbottle"
     static let solids = "fork.knife"
-    static let diaper = "circle.dotted.circle"
+    static let play = "play.fill"
+    static let pause = "pause.fill"
+    static let stop = "stop.fill"
 
     static func symbol(for e: Entry) -> String {
         switch e.kind {
         case .sleep: sleep
-        case .diaper: diaper
         case .feed:
             switch e.feedMethod ?? .breast {
             case .breast: feed

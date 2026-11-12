@@ -77,7 +77,7 @@ struct LullaWidgetView: View {
 
 /// The headline / big value / caption trio every family draws from.
 struct WidgetStatus {
-    enum Big { case text(String), timer(Date) }
+    enum Big { case text(String), timer(Date, paused: Date?) }
 
     let label: String
     let big: Big
@@ -86,14 +86,14 @@ struct WidgetStatus {
 
     init(_ s: LullaSnapshot) {
         if let start = s.feedStart {
-            label = "Feeding" + (s.feedSide.map { " · \($0.short)" } ?? "")
-            big = .timer(start)
+            label = (s.isFeedPaused ? "Feed paused" : "Feeding") + (s.feedSide.map { " · \($0.short)" } ?? "")
+            big = .timer(s.feedAnchor ?? start, paused: s.feedPausedAt)
             caption = Text("since \(Format.time(start))")
             icon = "drop.fill"
         } else if let start = s.sleepStart {
-            label = "Asleep"
-            big = .timer(start)
-            caption = Text("since \(Format.time(start))")
+            label = s.isSleepPaused ? "Sleep paused" : "Asleep"
+            big = .timer(s.sleepAnchor ?? start, paused: s.sleepPausedAt)
+            caption = Text(s.sleepPausedAt.map { "paused \(Format.time($0))" } ?? "since \(Format.time(start))")
             icon = "moon.zzz.fill"
         } else if s.isNightWaking {
             label = "Night"
@@ -125,7 +125,7 @@ struct WidgetStatus {
     @ViewBuilder func bigView(size: CGFloat) -> some View {
         switch big {
         case .text(let t): Text(t).font(.lullaSerif(size)).minimumScaleFactor(0.6).lineLimit(1)
-        case .timer(let d): Text(d, style: .timer).font(.lullaSerif(size)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
+        case .timer(let d, let paused): ElapsedText(anchor: d, pausedAt: paused).font(.lullaSerif(size)).lineLimit(1).minimumScaleFactor(0.6)
         }
     }
 }
@@ -196,14 +196,16 @@ struct MediumWidget: View {
                 MonoLabel(feedDetail, color: .lullaMuted)
                 Spacer(minLength: 0)
                 HStack(spacing: 6) {
-                    Button(intent: ToggleSleepIntent()) {
-                        pill(snap.isAsleep ? "sun.max" : "moon.zzz", filled: snap.isAsleep)
-                    }
-                    Button(intent: ToggleFeedIntent()) {
-                        pill(snap.isFeeding ? "stop.fill" : "drop", filled: snap.isFeeding)
-                    }
-                    Link(destination: URL(string: "lulla://diaper")!) {
-                        pill("circle.dotted.circle", filled: false)
+                    if snap.isAsleep {
+                        Button(intent: PauseSleepIntent()) {
+                            pill(snap.isSleepPaused ? LullaIcon.play : LullaIcon.pause, filled: false)
+                        }
+                        Button(intent: EndSleepIntent()) { pill(LullaIcon.stop, filled: true) }
+                    } else {
+                        Button(intent: StartSleepIntent()) { pill(LullaIcon.play, filled: true) }
+                        Button(intent: ToggleFeedIntent()) {
+                            pill(snap.isFeeding ? LullaIcon.stop : LullaIcon.feed, filled: false)
+                        }
                     }
                 }
                 .buttonStyle(.plain)
@@ -217,6 +219,7 @@ struct MediumWidget: View {
     }
 
     private var feedDetail: String {
+        if snap.isAsleep { return snap.isSleepPaused ? "Sleep paused" : "Pause · stop sleep" }
         if snap.isFeeding { return "Tap ■ to stop" }
         if snap.feedingStyle == .bottle { return "Tap to log usual" }
         return "Next side · \(snap.nextSide.short)"
@@ -239,11 +242,12 @@ struct CircularWidget: View {
     var body: some View {
         Group {
             if let start = snap.sleepStart ?? snap.feedStart {
+                let feeding = snap.sleepStart == nil
+                let paused = feeding ? snap.feedPausedAt : snap.sleepPausedAt
                 VStack(spacing: 1) {
-                    Image(systemName: snap.isFeeding ? "drop.fill" : "moon.zzz.fill").font(.system(size: 12))
-                    Text(start, style: .timer)
+                    Image(systemName: paused != nil ? "pause.fill" : (feeding ? "drop.fill" : "moon.zzz.fill")).font(.system(size: 12))
+                    ElapsedText(anchor: (feeding ? snap.feedAnchor : snap.sleepAnchor) ?? start, pausedAt: paused)
                         .font(.system(size: 11, weight: .semibold, design: .rounded))
-                        .monospacedDigit()
                         .multilineTextAlignment(.center)
                         .minimumScaleFactor(0.6)
                 }
@@ -303,7 +307,10 @@ struct InlineWidget: View {
 
     var body: some View {
         if let start = snap.sleepStart {
-            Label { Text("Asleep ") + Text(start, style: .timer) } icon: { Image(systemName: "moon.zzz.fill") }
+            Label {
+                Text(snap.isSleepPaused ? "Paused " : "Asleep ")
+                    + Text(timerInterval: (snap.sleepAnchor ?? start)...Date.distantFuture, pauseTime: snap.sleepPausedAt, countsDown: false)
+            } icon: { Image(systemName: snap.isSleepPaused ? "pause.fill" : "moon.zzz.fill") }
         } else if let p = snap.prediction {
             Label("\(p.title) \(Format.time(p.windowStart)) · fed \(snap.lastFeedPhrase)", systemImage: "moon.zzz")
         } else {

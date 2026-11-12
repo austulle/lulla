@@ -176,11 +176,37 @@ final class LogDataTests: XCTestCase {
         let t0 = Date(timeIntervalSince1970: 2_000_000)
         XCTAssertTrue(d.startSleep(at: t0))
         XCTAssertFalse(d.startSleep(at: t0))
-        d.add(.diaper(.wet, at: t0.addingTimeInterval(-60)))
-        XCTAssertEqual(d.entries.first?.kind, .diaper)
+        d.add(.bottle(ml: 90, content: nil, at: t0.addingTimeInterval(-60)))
+        XCTAssertEqual(d.entries.first?.kind, .feed)
         let ended = d.endSleep(at: t0.addingTimeInterval(3600))
         XCTAssertEqual(ended?.duration(), 3600)
         XCTAssertNil(d.activeSleep)
+    }
+
+    func testPauseResumeExcludesPausedTime() {
+        var d = LogData()
+        let t0 = Date(timeIntervalSince1970: 3_000_000)
+        d.startSleep(at: t0)
+        XCTAssertEqual(d.togglePause(.sleep, at: t0.addingTimeInterval(600)), true)
+        XCTAssertTrue(d.activeSleep!.isPaused)
+        // While paused the duration stays frozen at 10 min.
+        XCTAssertEqual(d.activeSleep!.duration(at: t0.addingTimeInterval(900)), 600)
+        XCTAssertEqual(d.togglePause(.sleep, at: t0.addingTimeInterval(1200)), false)
+        XCTAssertEqual(d.activeSleep!.timerAnchor, t0.addingTimeInterval(600))
+        let ended = d.endSleep(at: t0.addingTimeInterval(1800))
+        XCTAssertEqual(ended?.duration(), 1200) // 30 min minus a 10 min pause
+        XCTAssertNil(d.togglePause(.sleep, at: t0))
+    }
+
+    func testStoppingWhilePausedEndsAtThePause() {
+        var d = LogData()
+        let t0 = Date(timeIntervalSince1970: 4_000_000)
+        d.startBreast(.left, at: t0)
+        d.togglePause(.feed, at: t0.addingTimeInterval(300))
+        let stopped = d.stopFeed(at: t0.addingTimeInterval(900))
+        XCTAssertEqual(stopped?.end, t0.addingTimeInterval(300))
+        XCTAssertEqual(stopped?.duration(), 300)
+        XCTAssertNil(stopped?.pausedAt)
     }
 
     func testStoreRoundTrip() throws {

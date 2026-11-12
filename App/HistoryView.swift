@@ -51,7 +51,6 @@ struct HistoryView: View {
         let t = Self.totals(day.start, data: data)
         var parts = ["Sleep \(Format.duration(t.sleep))", "\(t.naps) naps", "\(t.feeds) feeds"]
         if t.bottleML > 0 { parts.append(Format.volume(ml: t.bottleML, unit: unit)) }
-        parts.append("\(t.diapers) diapers")
         return VStack(alignment: .leading, spacing: 4) {
             Text(day.start.formatted(.dateTime.weekday(.wide).day().month(.wide)))
                 .font(.lullaSerif(20))
@@ -70,14 +69,14 @@ struct HistoryView: View {
         return grouped.keys.sorted(by: >).prefix(limit).map { Day(start: $0, entries: grouped[$0] ?? []) }
     }
 
-    private static func totals(_ dayStart: Date, data: LogData) -> (sleep: TimeInterval, naps: Int, feeds: Int, bottleML: Double, diapers: Int) {
+    private static func totals(_ dayStart: Date, data: LogData) -> (sleep: TimeInterval, naps: Int, feeds: Int, bottleML: Double) {
         let cal = Calendar.current
         let dayEnd = cal.date(byAdding: .day, value: 1, to: dayStart) ?? dayStart.addingTimeInterval(86400)
         let now = Date()
         let interval = DateInterval(start: dayStart, end: min(dayEnd, max(now, dayStart)))
         let all = data.entries(overlapping: interval, now: now)
         let sleep = all.filter { $0.kind == .sleep }.reduce(0.0) { sum, e in
-            sum + max(0, min(e.end ?? now, dayEnd).timeIntervalSince(max(e.start, dayStart)))
+            sum + max(0, min(min(e.end ?? now, dayEnd).timeIntervalSince(max(e.start, dayStart)), e.duration(at: now)))
         }
         let predictor = NapPredictor()
         let inDay = all.filter { $0.start >= dayStart && $0.start < dayEnd }
@@ -85,8 +84,7 @@ struct HistoryView: View {
             sleep,
             inDay.filter { $0.kind == .sleep && !predictor.isNightSleep($0) }.count,
             inDay.filter { $0.kind == .feed }.count,
-            inDay.filter { $0.feedMethod == .bottle }.compactMap(\.amountML).reduce(0, +),
-            inDay.filter { $0.kind == .diaper }.count
+            inDay.filter { $0.feedMethod == .bottle }.compactMap(\.amountML).reduce(0, +)
         )
     }
 }

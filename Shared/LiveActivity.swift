@@ -8,6 +8,11 @@ struct LullaActivityAttributes: ActivityAttributes {
     struct ContentState: Codable, Hashable {
         var start: Date
         var side: BreastSide?
+        /// Count-up anchor (start + finished pauses) and current pause.
+        var anchor: Date
+        var pausedAt: Date?
+
+        var isPaused: Bool { pausedAt != nil }
     }
 
     var kind: Kind
@@ -29,7 +34,9 @@ enum LiveActivitySync {
                 continue
             }
 
-            let state = LullaActivityAttributes.ContentState(start: running.start, side: running.side)
+            let state = LullaActivityAttributes.ContentState(
+                start: running.start, side: running.side,
+                anchor: running.timerAnchor, pausedAt: running.pausedAt)
             if let current = existing.first {
                 if current.content.state != state {
                     await current.update(ActivityContent(state: state, staleDate: nil))

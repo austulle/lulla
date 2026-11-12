@@ -12,19 +12,18 @@ struct LullaLiveActivity: Widget {
                 .widgetURL(URL(string: "lulla://today"))
         } dynamicIsland: { context in
             let isSleep = context.attributes.kind == .sleep
-            let icon = isSleep ? "moon.zzz.fill" : "drop.fill"
+            let icon = context.state.isPaused ? "pause.fill" : (isSleep ? "moon.zzz.fill" : "drop.fill")
             let accent = isSleep ? Color(hex: 0x9AA8F2) : Color(hex: 0xF4A6BF)
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
-                    Label(isSleep ? "Asleep" : feedTitle(context.state), systemImage: icon)
+                    Label(isSleep ? (context.state.isPaused ? "Paused" : "Asleep") : feedTitle(context.state), systemImage: icon)
                         .font(.lullaMono(12))
                         .foregroundStyle(accent)
                         .padding(.leading, 4)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
-                    Text(context.state.start, style: .timer)
+                    ElapsedText(anchor: context.state.anchor, pausedAt: context.state.pausedAt)
                         .font(.lullaSerif(28))
-                        .monospacedDigit()
                         .multilineTextAlignment(.trailing)
                         .frame(maxWidth: 120)
                 }
@@ -41,8 +40,7 @@ struct LullaLiveActivity: Widget {
             } compactLeading: {
                 Image(systemName: icon).foregroundStyle(accent)
             } compactTrailing: {
-                Text(context.state.start, style: .timer)
-                    .monospacedDigit()
+                ElapsedText(anchor: context.state.anchor, pausedAt: context.state.pausedAt)
                     .frame(maxWidth: 56)
                     .foregroundStyle(accent)
             } minimal: {
@@ -54,7 +52,7 @@ struct LullaLiveActivity: Widget {
     }
 
     private func feedTitle(_ s: LullaActivityAttributes.ContentState) -> String {
-        "Feeding" + (s.side.map { " · \($0.short)" } ?? "")
+        (s.isPaused ? "Paused" : "Feeding") + (s.side.map { " · \($0.short)" } ?? "")
     }
 }
 
@@ -70,14 +68,13 @@ private struct LockScreenActivity: View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 MonoLabel(isSleep
-                          ? "\(attributes.babyName) · asleep"
-                          : "\(attributes.babyName) · feeding" + (state.side.map { " · \($0.title)" } ?? ""),
+                          ? "\(attributes.babyName) · " + (state.isPaused ? "sleep paused" : "asleep")
+                          : "\(attributes.babyName) · " + (state.isPaused ? "feed paused" : "feeding") + (state.side.map { " · \($0.title)" } ?? ""),
                           color: ink.opacity(0.85))
-                Text(state.start, style: .timer)
+                ElapsedText(anchor: state.anchor, pausedAt: state.pausedAt)
                     .font(.lullaSerif(40))
-                    .monospacedDigit()
                     .foregroundStyle(ink)
-                MonoLabel("since \(Format.time(state.start))", color: ink.opacity(0.7))
+                MonoLabel(state.pausedAt.map { "paused \(Format.time($0))" } ?? "since \(Format.time(state.start))", color: ink.opacity(0.7))
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             ActivityButtons(kind: attributes.kind, state: state, dark: false)
@@ -95,17 +92,28 @@ private struct ActivityButtons: View {
     var body: some View {
         HStack(spacing: 6) {
             if kind == .sleep {
-                Button(intent: EndSleepIntent()) { pill("Wake up", primary: true) }
+                Button(intent: PauseSleepIntent()) { round(state.isPaused ? LullaIcon.play : LullaIcon.pause) }
+                Button(intent: EndSleepIntent()) { round(LullaIcon.stop, primary: true) }
             } else {
+                Button(intent: PauseFeedingIntent()) { round(state.isPaused ? LullaIcon.play : LullaIcon.pause) }
                 if let side = state.side {
                     Button(intent: StartBreastfeedingIntent(side: side.opposite == .left ? .left : .right)) {
                         pill("→ \(side.opposite.short)", primary: false)
                     }
                 }
-                Button(intent: StopFeedingIntent()) { pill("Done", primary: true) }
+                Button(intent: StopFeedingIntent()) { round(LullaIcon.stop, primary: true) }
             }
         }
         .buttonStyle(.plain)
+    }
+
+    private func round(_ symbol: String, primary: Bool = false) -> some View {
+        let fill: Color = primary ? (dark ? .white : .lullaCream) : (dark ? .white.opacity(0.18) : .lullaCream.opacity(0.55))
+        return Image(systemName: symbol)
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(primary || !dark ? Color.lullaInk : .white)
+            .frame(width: 40, height: 40)
+            .background(fill, in: Circle())
     }
 
     private func pill(_ text: String, primary: Bool) -> some View {

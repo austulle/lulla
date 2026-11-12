@@ -56,7 +56,6 @@ enum Format {
         switch e.kind {
         case .sleep: return "Sleep · " + duration(e.duration(at: now))
         case .feed: return feedLabel(e, unit: unit, now: now)
-        case .diaper: return "Diaper · " + (e.diaper?.title.lowercased() ?? "")
         }
     }
 

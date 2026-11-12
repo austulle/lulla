@@ -25,6 +25,15 @@ struct LullaShortcuts: AppShortcutsProvider {
             systemImageName: "sun.max"
         )
         AppShortcut(
+            intent: PauseSleepIntent(),
+            phrases: [
+                "Pause sleep in \(.applicationName)",
+                "Resume sleep in \(.applicationName)",
+            ],
+            shortTitle: "Pause Sleep",
+            systemImageName: "pause.circle"
+        )
+        AppShortcut(
             intent: StartBreastfeedingIntent(),
             phrases: [
                 "Start feeding in \(.applicationName)",
@@ -44,6 +53,15 @@ struct LullaShortcuts: AppShortcutsProvider {
             systemImageName: "stop.circle"
         )
         AppShortcut(
+            intent: PauseFeedingIntent(),
+            phrases: [
+                "Pause feeding in \(.applicationName)",
+                "Resume feeding in \(.applicationName)",
+            ],
+            shortTitle: "Pause Feeding",
+            systemImageName: "pause.circle"
+        )
+        AppShortcut(
             intent: LogBottleIntent(),
             phrases: [
                 "Log a bottle in \(.applicationName)",
@@ -51,15 +69,6 @@ struct LullaShortcuts: AppShortcutsProvider {
             ],
             shortTitle: "Log Bottle",
             systemImageName: "waterbottle"
-        )
-        AppShortcut(
-            intent: LogDiaperIntent(),
-            phrases: [
-                "Log a diaper in \(.applicationName)",
-                "Log a \(\.$kind) diaper in \(.applicationName)",
-            ],
-            shortTitle: "Log Diaper",
-            systemImageName: "circle.dotted.circle"
         )
         AppShortcut(
             intent: NextNapIntent(),

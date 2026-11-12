@@ -54,23 +54,27 @@ struct HeroCard: View {
     }
 
     private func asleep(since start: Date) -> some View {
-        VStack(alignment: .leading, spacing: 14) {
+        let paused = snap.sleepPausedAt
+        return VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top) {
-                MonoLabel("Asleep · since \(Format.time(start))")
+                MonoLabel(paused.map { "Paused at \(Format.time($0))" } ?? "Asleep · since \(Format.time(start))")
                 Spacer()
                 OrbitMark().frame(width: 64, height: 44)
             }
-            Text(start, style: .timer)
+            ElapsedText(anchor: snap.sleepAnchor ?? start, pausedAt: paused)
                 .font(.lullaSerif(58))
-                .monospacedDigit()
-                .foregroundStyle(Color.lullaInk)
-            DashedRule()
-            Button {
-                model.mutate { $0.endSleep(at: Date()) }
-            } label: {
-                Label("Wake up", systemImage: LullaIcon.wake)
+                .foregroundStyle(Color.lullaInk.opacity(paused == nil ? 1 : 0.45))
+            if paused != nil {
+                Text("Resume if they settle back down. Stop ends the sleep at the pause.")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Color.lullaInk.opacity(0.75))
             }
-            .buttonStyle(InkButtonStyle())
+            DashedRule()
+            TimerControls(paused: paused != nil, stopTitle: "Wake up") {
+                model.mutate { _ = $0.togglePause(.sleep, at: Date()) }
+            } onStop: {
+                model.mutate { _ = $0.endSleep(at: Date()) }
+            }
             .sensoryFeedback(.success, trigger: snap.sleepStart)
         }
     }
@@ -119,7 +123,7 @@ struct HeroCard: View {
             Button {
                 model.mutate { $0.startSleep(at: Date()) }
             } label: {
-                Label("Start sleep", systemImage: LullaIcon.sleep)
+                Label("Start sleep", systemImage: LullaIcon.play)
             }
             .buttonStyle(InkButtonStyle())
             .sensoryFeedback(.impact, trigger: snap.sleepStart)
@@ -144,7 +148,7 @@ struct HeroCard: View {
             Button {
                 model.mutate { $0.startSleep(at: Date()) }
             } label: {
-                Label("Back to sleep", systemImage: LullaIcon.sleep)
+                Label("Back to sleep", systemImage: LullaIcon.play)
             }
             .buttonStyle(InkButtonStyle())
         }
@@ -160,8 +164,10 @@ struct HeroCard: View {
                 .font(.system(size: 15))
                 .foregroundStyle(Color.lullaInk.opacity(0.8))
             HStack(spacing: 10) {
-                Button("Asleep now") { model.mutate { $0.startSleep(at: Date()) } }
-                    .buttonStyle(InkButtonStyle())
+                Button { model.mutate { $0.startSleep(at: Date()) } } label: {
+                    Label("Start sleep", systemImage: LullaIcon.play)
+                }
+                .buttonStyle(InkButtonStyle())
                 Button("Add past sleep") { router.sheet = .add(.sleep) }
                     .buttonStyle(OutlineButtonStyle())
             }
@@ -197,6 +203,50 @@ struct Tag: View {
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(Color(hex: 0xC8E85A).opacity(0.55), in: Capsule())
+    }
+}
+
+/// Play/pause and stop, as two round buttons with labels.
+struct TimerControls: View {
+    let paused: Bool
+    var stopTitle: String = "Stop"
+    var extra: AnyView? = nil
+    let onToggle: () -> Void
+    let onStop: () -> Void
+
+    init(paused: Bool, stopTitle: String = "Stop", extra: AnyView? = nil,
+         onToggle: @escaping () -> Void, onStop: @escaping () -> Void) {
+        self.paused = paused
+        self.stopTitle = stopTitle
+        self.extra = extra
+        self.onToggle = onToggle
+        self.onStop = onStop
+    }
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 0) {
+            control(paused ? LullaIcon.play : LullaIcon.pause, paused ? "Resume" : "Pause", filled: false, action: onToggle)
+            if let extra { extra.frame(maxWidth: .infinity) }
+            control(LullaIcon.stop, stopTitle, filled: true, action: onStop)
+        }
+        .sensoryFeedback(.selection, trigger: paused)
+    }
+
+    private func control(_ symbol: String, _ title: String, filled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: symbol)
+                    .font(.system(size: 22))
+                    .foregroundStyle(filled ? Color.lullaCream : Color.lullaInk)
+                    .frame(width: 66, height: 66)
+                    .background(Circle().fill(filled ? Color.lullaInk : Color.clear))
+                    .overlay(Circle().stroke(Color.lullaInk.opacity(filled ? 0 : 0.35), lineWidth: 1))
+                MonoLabel(title)
+            }
+            .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(title)
     }
 }
 
@@ -244,25 +294,39 @@ struct FeedTimerCard: View {
     var body: some View {
         CreamPanel {
             VStack(alignment: .leading, spacing: 12) {
-                MonoLabel("Feeding" + (snap.feedSide.map { " · \($0.title)" } ?? ""))
+                MonoLabel((snap.isFeedPaused ? "Feeding paused" : "Feeding") + (snap.feedSide.map { " · \($0.title)" } ?? ""))
                 if let start = snap.feedStart {
-                    Text(start, style: .timer)
+                    ElapsedText(anchor: snap.feedAnchor ?? start, pausedAt: snap.feedPausedAt)
                         .font(.lullaSerif(44))
-                        .monospacedDigit()
-                        .foregroundStyle(Color.lullaInk)
+                        .foregroundStyle(Color.lullaInk.opacity(snap.isFeedPaused ? 0.45 : 1))
                 }
-                HStack(spacing: 10) {
-                    if let side = snap.feedSide {
-                        Button("Switch to \(side.opposite.short)") {
-                            model.mutate { $0.startBreast(side.opposite, at: Date()) }
-                        }
-                        .buttonStyle(OutlineButtonStyle())
-                    }
-                    Button("Done") { model.mutate { $0.stopFeed(at: Date()) } }
-                        .buttonStyle(InkButtonStyle())
+                TimerControls(paused: snap.isFeedPaused, stopTitle: "Done", extra: switchButton) {
+                    model.mutate { _ = $0.togglePause(.feed, at: Date()) }
+                } onStop: {
+                    model.mutate { _ = $0.stopFeed(at: Date()) }
                 }
             }
         }
+    }
+
+    private var switchButton: AnyView? {
+        guard let side = snap.feedSide else { return nil }
+        return AnyView(
+            Button {
+                model.mutate { $0.startBreast(side.opposite, at: Date()) }
+            } label: {
+                VStack(spacing: 8) {
+                    Text(side.opposite.short)
+                        .font(.lullaSerif(26))
+                        .foregroundStyle(Color.lullaInk)
+                        .frame(width: 66, height: 66)
+                        .overlay(Circle().stroke(Color.lullaInk.opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: [3, 3])))
+                    MonoLabel("Switch")
+                }
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel("Switch to \(side.opposite.title)")
+        )
     }
 }
 
@@ -275,34 +339,48 @@ struct ActionRow: View {
 
     var body: some View {
         HStack(spacing: 10) {
-            tile(snap.isAsleep ? "Wake" : "Sleep",
-                 icon: snap.isAsleep ? LullaIcon.wake : LullaIcon.sleep) {
+            tile(snap.isAsleep ? "Stop sleep" : "Start sleep",
+                 icon: snap.isAsleep ? LullaIcon.stop : LullaIcon.play,
+                 detail: sleepDetail, prominent: true) {
                 model.mutate { d in
                     if d.activeSleep != nil { _ = d.endSleep(at: Date()) } else { _ = d.startSleep(at: Date()) }
                 }
             }
-            tile(snap.isFeeding ? "Stop feed" : "Feed",
-                 icon: snap.isFeeding ? "stop.circle" : LullaIcon.feed,
-                 detail: snap.isFeeding || snap.feedingStyle == .bottle ? nil : "Next \(snap.nextSide.short)") {
+            .frame(maxWidth: .infinity)
+            .layoutPriority(1)
+            tile(snap.isFeeding ? "Done" : "Feed",
+                 icon: snap.isFeeding ? LullaIcon.stop : LullaIcon.feed,
+                 detail: snap.isFeeding || snap.feedingStyle == .bottle ? nil : "Next \(snap.nextSide.short)",
+                 prominent: false) {
                 if snap.isFeeding { model.mutate { _ = $0.stopFeed(at: Date()) } } else { router.sheet = .feed }
             }
-            tile("Diaper", icon: LullaIcon.diaper) { router.sheet = .diaper }
+            .frame(width: 120)
         }
     }
 
-    private func tile(_ title: String, icon: String, detail: String? = nil, action: @escaping () -> Void) -> some View {
+    private var sleepDetail: String {
+        if snap.isAsleep { return snap.isSleepPaused ? "Paused" : "Asleep" }
+        if let since = snap.awakeSince { return "Awake \(Format.duration(snap.now.timeIntervalSince(since)))" }
+        return "Sleep"
+    }
+
+    private func tile(_ title: String, icon: String, detail: String?, prominent: Bool, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(alignment: .leading, spacing: 18) {
-                Image(systemName: icon).font(.system(size: 20, weight: .light))
+                Image(systemName: icon)
+                    .font(.system(size: prominent ? 18 : 18, weight: .medium))
+                    .foregroundStyle(prominent ? Color.lullaCream : Color.lullaInk)
+                    .frame(width: 40, height: 40)
+                    .background(Circle().fill(prominent ? Color.lullaInk : Color.lullaInk.opacity(0.07)))
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(title).font(.system(size: 15, weight: .medium))
+                    Text(title).font(.system(size: prominent ? 17 : 15, weight: .medium))
                     MonoLabel(detail ?? " ", color: .lullaMuted)
                 }
             }
             .foregroundStyle(Color.lullaInk)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
-            .background(Color.lullaCream.opacity(0.88), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Color.lullaCream.opacity(prominent ? 0.95 : 0.85), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: snap.isAsleep)
@@ -311,7 +389,7 @@ struct ActionRow: View {
 
 // MARK: - Timeline strip
 
-/// The last 18 hours and the next 6: sleep blocks, feeds, diapers, the
+/// The last 18 hours and the next 6: sleep blocks, feeds, the
 /// predicted window and a "now" line.
 struct DayStrip: View {
     let data: LogData
@@ -369,14 +447,10 @@ struct DayStrip: View {
                                                        endPoint: CGPoint(x: r.minX, y: r.maxY)))
                     }
 
-                    // Feeds above, diapers below.
+                    // Feeds above the track.
                     for e in entries where e.kind == .feed {
                         let cx = x(e.start)
                         ctx.fill(Path(ellipseIn: CGRect(x: cx - 3.5, y: 2, width: 7, height: 7)), with: .color(Color(hex: 0xEE9DB8)))
-                    }
-                    for e in entries where e.kind == .diaper {
-                        let cx = x(e.start)
-                        ctx.fill(Path(CGRect(x: cx - 0.75, y: trackY + trackH - 7, width: 1.5, height: 7)), with: .color(.lullaForest))
                     }
 
                     // Now.
@@ -416,8 +490,8 @@ struct SummaryCard: View {
                 HStack(alignment: .firstTextBaseline) {
                     stat("Sleep", Format.duration(snap.todaySleep))
                     stat("Naps", "\(snap.todayNaps)")
+                    stat("Longest", Format.duration(snap.todayLongest))
                     stat("Feeds", "\(snap.todayFeeds)")
-                    stat("Diapers", "\(snap.todayDiapers)")
                 }
                 DashedRule()
                 HStack {
@@ -462,7 +536,6 @@ struct RecentCard: View {
                     Menu {
                         Button("Sleep", systemImage: LullaIcon.sleep) { router.sheet = .add(.sleep) }
                         Button("Feed", systemImage: LullaIcon.feed) { router.sheet = .add(.feed) }
-                        Button("Diaper", systemImage: LullaIcon.diaper) { router.sheet = .add(.diaper) }
                     } label: {
                         Label("Add", systemImage: "plus")
                             .font(.lullaMono(11))
@@ -509,7 +582,7 @@ struct EntryRow: View {
                 Text(Format.title(entry, unit: unit, now: now))
                     .font(.system(size: 15))
                 if entry.isRunning {
-                    MonoLabel("Running", color: Color(hex: 0x1F8A5B))
+                    MonoLabel(entry.isPaused ? "Paused" : "Running", color: Color(hex: 0x1F8A5B))
                 } else if let note = entry.note, !note.isEmpty {
                     Text(note).font(.system(size: 12)).foregroundStyle(Color.lullaMuted).lineLimit(1)
                 }
