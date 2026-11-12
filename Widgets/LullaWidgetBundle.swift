@@ -2,10 +2,10 @@ import SwiftUI
 import WidgetKit
 
 @main
-struct LullWidgetBundle: WidgetBundle {
+struct LullaWidgetBundle: WidgetBundle {
     var body: some Widget {
-        LullWidget()
-        LullLiveActivity()
+        LullaWidget()
+        LullaLiveActivity()
         SleepControl()
         FeedControl()
     }
@@ -15,7 +15,7 @@ struct LullWidgetBundle: WidgetBundle {
 
 struct SleepControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        StaticControlConfiguration(kind: "com.lull.baby.control.sleep", provider: Provider()) { asleep in
+        StaticControlConfiguration(kind: "com.lulla.baby.control.sleep", provider: Provider()) { asleep in
             ControlWidgetToggle("Sleep", isOn: asleep, action: SetSleepIntent()) { on in
                 Label(on ? "Asleep" : "Awake", systemImage: on ? "moon.zzz.fill" : "moon.zzz")
             }
@@ -33,7 +33,7 @@ struct SleepControl: ControlWidget {
 
 struct FeedControl: ControlWidget {
     var body: some ControlWidgetConfiguration {
-        StaticControlConfiguration(kind: "com.lull.baby.control.feed", provider: Provider()) { feeding in
+        StaticControlConfiguration(kind: "com.lulla.baby.control.feed", provider: Provider()) { feeding in
             ControlWidgetToggle("Feed", isOn: feeding, action: SetFeedingIntent()) { on in
                 Label(on ? "Feeding" : "Feed", systemImage: on ? "drop.fill" : "drop")
             }

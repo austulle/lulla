@@ -1,5 +1,5 @@
 import XCTest
-@testable import Lull
+@testable import Lulla
 
 final class NapPredictorTests: XCTestCase {
     private var cal: Calendar = {
@@ -106,7 +106,7 @@ final class NapPredictorTests: XCTestCase {
         let data = LogData(profile: profile(ageDays: 98),
                            entries: [.sleep(start: at(19, 0, day: -1), end: at(1, 30))])
         XCTAssertNil(predictor().predict(data, now: at(1, 45)))
-        let snap = LullSnapshot.make(data, now: at(1, 45), calendar: cal)
+        let snap = LullaSnapshot.make(data, now: at(1, 45), calendar: cal)
         XCTAssertTrue(snap.isNightWaking)
         XCTAssertEqual(snap.mood, .night)
     }

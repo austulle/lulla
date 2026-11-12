@@ -4,10 +4,10 @@ import SwiftUI
 // headlines, small monospaced uppercase labels, hairlines and dot grids.
 
 extension Color {
-    static let lullCream = Color(red: 0.957, green: 0.945, blue: 0.918)
-    static let lullInk = Color(red: 0.11, green: 0.11, blue: 0.10)
-    static let lullMuted = Color(red: 0.42, green: 0.41, blue: 0.38)
-    static let lullForest = Color(red: 0.05, green: 0.23, blue: 0.18)
+    static let lullaCream = Color(red: 0.957, green: 0.945, blue: 0.918)
+    static let lullaInk = Color(red: 0.11, green: 0.11, blue: 0.10)
+    static let lullaMuted = Color(red: 0.42, green: 0.41, blue: 0.38)
+    static let lullaForest = Color(red: 0.05, green: 0.23, blue: 0.18)
 
     init(hex: UInt32) {
         self.init(red: Double((hex >> 16) & 0xFF) / 255,
@@ -17,11 +17,11 @@ extension Color {
 }
 
 extension Font {
-    static func lullSerif(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
+    static func lullaSerif(_ size: CGFloat, weight: Font.Weight = .regular) -> Font {
         .system(size: size, weight: weight, design: .serif)
     }
 
-    static func lullMono(_ size: CGFloat = 11, weight: Font.Weight = .medium) -> Font {
+    static func lullaMono(_ size: CGFloat = 11, weight: Font.Weight = .medium) -> Font {
         .system(size: size, weight: weight, design: .monospaced)
     }
 }
@@ -29,22 +29,22 @@ extension Font {
 /// "NEXT NAP" style label.
 struct MonoLabel: View {
     let text: String
-    var color: Color = .lullInk.opacity(0.7)
+    var color: Color = .lullaInk.opacity(0.7)
 
-    init(_ text: String, color: Color = .lullInk.opacity(0.7)) {
+    init(_ text: String, color: Color = .lullaInk.opacity(0.7)) {
         self.text = text
         self.color = color
     }
 
     var body: some View {
         Text(text.uppercased())
-            .font(.lullMono(10.5))
+            .font(.lullaMono(10.5))
             .tracking(1.2)
             .foregroundStyle(color)
     }
 }
 
-extension LullSnapshot.Mood {
+extension LullaSnapshot.Mood {
     /// 3×3 mesh colors, row by row.
     var meshColors: [Color] {
         switch self {
@@ -70,7 +70,7 @@ extension LullSnapshot.Mood {
     /// Text color that reads on the gradient itself.
     var onGradient: Color {
         switch self {
-        case .awake, .feeding: .lullForest
+        case .awake, .feeding: .lullaForest
         case .asleep, .night: .white
         }
     }
@@ -78,7 +78,7 @@ extension LullSnapshot.Mood {
 
 /// Full-bleed mesh gradient with a faint dot grid.
 struct GradientBackdrop: View {
-    var mood: LullSnapshot.Mood
+    var mood: LullaSnapshot.Mood
     var dots: Bool = true
 
     var body: some View {
@@ -119,7 +119,7 @@ struct DotGrid: View {
 
 /// Two crossing orbits — a solid one and a dashed one — with two dots.
 struct OrbitMark: View {
-    var color: Color = .lullInk
+    var color: Color = .lullaInk
     var lineWidth: CGFloat = 1.2
 
     var body: some View {
@@ -150,13 +150,13 @@ struct CreamPanel<Content: View>: View {
         content
             .padding(padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.lullCream, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Color.lullaCream, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
     }
 }
 
 /// Thin dashed rule, as on the reference posters.
 struct DashedRule: View {
-    var color: Color = .lullInk.opacity(0.25)
+    var color: Color = .lullaInk.opacity(0.25)
 
     var body: some View {
         Line()
@@ -174,7 +174,7 @@ struct DashedRule: View {
     }
 }
 
-enum LullIcon {
+enum LullaIcon {
     static let sleep = "moon.zzz"
     static let wake = "sun.max"
     static let feed = "drop"

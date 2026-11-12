@@ -17,13 +17,13 @@ private struct SheetFrame<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack {
-                Text(title).font(.lullSerif(30)).foregroundStyle(Color.lullInk)
+                Text(title).font(.lullaSerif(30)).foregroundStyle(Color.lullaInk)
                 Spacer()
                 Button { dismiss() } label: {
                     Image(systemName: "xmark").font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(Color.lullInk)
+                        .foregroundStyle(Color.lullaInk)
                         .frame(width: 32, height: 32)
-                        .background(Circle().fill(Color.lullInk.opacity(0.07)))
+                        .background(Circle().fill(Color.lullaInk.opacity(0.07)))
                 }
             }
             content
@@ -31,7 +31,7 @@ private struct SheetFrame<Content: View>: View {
         }
         .padding(20)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .background(Color.lullCream.ignoresSafeArea())
+        .background(Color.lullaCream.ignoresSafeArea())
     }
 }
 
@@ -91,9 +91,9 @@ struct FeedSheet: View {
                                 Spacer()
                                 if side == suggested { Tag("Next") }
                             }
-                            Text(side.short).font(.lullSerif(56))
+                            Text(side.short).font(.lullaSerif(56))
                         }
-                        .foregroundStyle(Color.lullInk)
+                        .foregroundStyle(Color.lullaInk)
                         .padding(16)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
@@ -103,7 +103,7 @@ struct FeedSheet: View {
                                                                    points: [[0, 0], [1, 0], [0, 1], [1, 1]],
                                                                    colors: [Color(hex: 0xFBE3C4), Color(hex: 0xF6B8C8),
                                                                             Color(hex: 0xDDEB9C), Color(hex: 0xF4C6D2)]))
-                                      : AnyShapeStyle(Color.lullInk.opacity(0.05)))
+                                      : AnyShapeStyle(Color.lullaInk.opacity(0.05)))
                         )
                     }
                     .buttonStyle(.plain)
@@ -111,10 +111,10 @@ struct FeedSheet: View {
             }
             Text("Starts a timer. Switch sides from the timer card; the side you end on decides the next suggestion.")
                 .font(.system(size: 13))
-                .foregroundStyle(Color.lullMuted)
+                .foregroundStyle(Color.lullaMuted)
             Button("Log a past feed instead") { router.sheet = .add(.feed) }
                 .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(Color.lullInk)
+                .foregroundStyle(Color.lullaInk)
         }
     }
 
@@ -125,7 +125,7 @@ struct FeedSheet: View {
                 Spacer()
                 VStack(spacing: 2) {
                     Text(unit == .ml ? "\(Int(amount))" : String(format: "%.1f", amount))
-                        .font(.lullSerif(56))
+                        .font(.lullaSerif(56))
                         .monospacedDigit()
                     MonoLabel(unit.label)
                 }
@@ -167,9 +167,9 @@ struct FeedSheet: View {
         Button(action: action) {
             Image(systemName: symbol)
                 .font(.system(size: 18, weight: .medium))
-                .foregroundStyle(Color.lullInk)
+                .foregroundStyle(Color.lullaInk)
                 .frame(width: 52, height: 52)
-                .overlay(Circle().stroke(Color.lullInk.opacity(0.3), lineWidth: 1))
+                .overlay(Circle().stroke(Color.lullaInk.opacity(0.3), lineWidth: 1))
         }
         .buttonRepeatBehavior(.enabled)
     }
@@ -194,10 +194,10 @@ struct DiaperSheet: View {
                             Image(systemName: symbol(kind)).font(.system(size: 20, weight: .light))
                             Text(kind.title).font(.system(size: 15, weight: .medium))
                         }
-                        .foregroundStyle(Color.lullInk)
+                        .foregroundStyle(Color.lullaInk)
                         .padding(14)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color.lullInk.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                        .background(Color.lullaInk.opacity(0.05), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                     }
                     .buttonStyle(.plain)
                 }
@@ -317,7 +317,7 @@ struct EntryEditor: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(Color.lullCream)
+            .background(Color.lullaCream)
             .navigationTitle(title)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -334,7 +334,7 @@ struct EntryEditor: View {
             }
             .onAppear { amount = unit.display(entry.amountML ?? model.data.profile?.defaultBottleML ?? 120) }
         }
-        .tint(.lullInk)
+        .tint(.lullaInk)
     }
 
     @ViewBuilder private var timedFields: some View {
@@ -345,7 +345,7 @@ struct EntryEditor: View {
         if !ongoing || !canBeOngoing {
             DatePicker("End", selection: $endDate, in: entry.start...)
             Text("Duration  \(Format.duration(endDate.timeIntervalSince(entry.start)))")
-                .foregroundStyle(Color.lullMuted)
+                .foregroundStyle(Color.lullaMuted)
         }
     }
 

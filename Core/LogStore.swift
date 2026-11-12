@@ -10,7 +10,7 @@ import Glibc
 /// read-modify-write (flock across processes), so a widget button and the
 /// app can't clobber each other.
 final class LogStore: @unchecked Sendable {
-    static let appGroup = "group.com.lull.baby"
+    static let appGroup = "group.com.lulla.baby"
     static let shared = LogStore(url: LogStore.defaultURL())
 
     let url: URL
@@ -28,12 +28,12 @@ final class LogStore: @unchecked Sendable {
         let fm = FileManager.default
         #if canImport(Darwin)
         if let group = fm.containerURL(forSecurityApplicationGroupIdentifier: appGroup) {
-            return group.appendingPathComponent("lull-log.json")
+            return group.appendingPathComponent("lulla-log.json")
         }
         #endif
         let base = fm.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? fm.temporaryDirectory
-        return base.appendingPathComponent("Lull/lull-log.json")
+        return base.appendingPathComponent("Lulla/lulla-log.json")
     }
 
     func load() -> LogData {

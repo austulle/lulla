@@ -3,13 +3,13 @@ import AppIntents
 import SwiftUI
 import WidgetKit
 
-struct LullLiveActivity: Widget {
+struct LullaLiveActivity: Widget {
     var body: some WidgetConfiguration {
-        ActivityConfiguration(for: LullActivityAttributes.self) { context in
+        ActivityConfiguration(for: LullaActivityAttributes.self) { context in
             LockScreenActivity(attributes: context.attributes, state: context.state)
                 .activityBackgroundTint(Color.clear)
-                .activitySystemActionForegroundColor(.lullInk)
-                .widgetURL(URL(string: "lull://today"))
+                .activitySystemActionForegroundColor(.lullaInk)
+                .widgetURL(URL(string: "lulla://today"))
         } dynamicIsland: { context in
             let isSleep = context.attributes.kind == .sleep
             let icon = isSleep ? "moon.zzz.fill" : "drop.fill"
@@ -17,13 +17,13 @@ struct LullLiveActivity: Widget {
             return DynamicIsland {
                 DynamicIslandExpandedRegion(.leading) {
                     Label(isSleep ? "Asleep" : feedTitle(context.state), systemImage: icon)
-                        .font(.lullMono(12))
+                        .font(.lullaMono(12))
                         .foregroundStyle(accent)
                         .padding(.leading, 4)
                 }
                 DynamicIslandExpandedRegion(.trailing) {
                     Text(context.state.start, style: .timer)
-                        .font(.lullSerif(28))
+                        .font(.lullaSerif(28))
                         .monospacedDigit()
                         .multilineTextAlignment(.trailing)
                         .frame(maxWidth: 120)
@@ -49,22 +49,22 @@ struct LullLiveActivity: Widget {
                 Image(systemName: icon).foregroundStyle(accent)
             }
             .keylineTint(accent)
-            .widgetURL(URL(string: "lull://today"))
+            .widgetURL(URL(string: "lulla://today"))
         }
     }
 
-    private func feedTitle(_ s: LullActivityAttributes.ContentState) -> String {
+    private func feedTitle(_ s: LullaActivityAttributes.ContentState) -> String {
         "Feeding" + (s.side.map { " · \($0.short)" } ?? "")
     }
 }
 
 private struct LockScreenActivity: View {
-    let attributes: LullActivityAttributes
-    let state: LullActivityAttributes.ContentState
+    let attributes: LullaActivityAttributes
+    let state: LullaActivityAttributes.ContentState
 
     var body: some View {
         let isSleep = attributes.kind == .sleep
-        let mood: LullSnapshot.Mood = isSleep ? (LullSnapshot.isNightHour(state.start) ? .night : .asleep) : .feeding
+        let mood: LullaSnapshot.Mood = isSleep ? (LullaSnapshot.isNightHour(state.start) ? .night : .asleep) : .feeding
         let ink = mood.onGradient
 
         HStack(alignment: .center, spacing: 12) {
@@ -74,7 +74,7 @@ private struct LockScreenActivity: View {
                           : "\(attributes.babyName) · feeding" + (state.side.map { " · \($0.title)" } ?? ""),
                           color: ink.opacity(0.85))
                 Text(state.start, style: .timer)
-                    .font(.lullSerif(40))
+                    .font(.lullaSerif(40))
                     .monospacedDigit()
                     .foregroundStyle(ink)
                 MonoLabel("since \(Format.time(state.start))", color: ink.opacity(0.7))
@@ -88,8 +88,8 @@ private struct LockScreenActivity: View {
 }
 
 private struct ActivityButtons: View {
-    let kind: LullActivityAttributes.Kind
-    let state: LullActivityAttributes.ContentState
+    let kind: LullaActivityAttributes.Kind
+    let state: LullaActivityAttributes.ContentState
     let dark: Bool
 
     var body: some View {
@@ -109,10 +109,10 @@ private struct ActivityButtons: View {
     }
 
     private func pill(_ text: String, primary: Bool) -> some View {
-        let fill: Color = primary ? (dark ? .white : .lullCream) : (dark ? .white.opacity(0.18) : .lullCream.opacity(0.55))
+        let fill: Color = primary ? (dark ? .white : .lullaCream) : (dark ? .white.opacity(0.18) : .lullaCream.opacity(0.55))
         return Text(text)
             .font(.system(size: 14, weight: .medium))
-            .foregroundStyle(primary || !dark ? Color.lullInk : .white)
+            .foregroundStyle(primary || !dark ? Color.lullaInk : .white)
             .padding(.horizontal, 14)
             .padding(.vertical, 9)
             .background(fill, in: Capsule())

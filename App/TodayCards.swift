@@ -3,8 +3,8 @@ import SwiftUI
 // MARK: - Buttons
 
 struct InkButtonStyle: ButtonStyle {
-    var fill: Color = .lullInk
-    var text: Color = .lullCream
+    var fill: Color = .lullaInk
+    var text: Color = .lullaCream
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
@@ -22,10 +22,10 @@ struct OutlineButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 15, weight: .medium))
-            .foregroundStyle(Color.lullInk)
+            .foregroundStyle(Color.lullaInk)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
-            .overlay(Capsule().stroke(Color.lullInk.opacity(0.35), lineWidth: 1))
+            .overlay(Capsule().stroke(Color.lullaInk.opacity(0.35), lineWidth: 1))
             .opacity(configuration.isPressed ? 0.6 : 1)
     }
 }
@@ -35,7 +35,7 @@ struct OutlineButtonStyle: ButtonStyle {
 struct HeroCard: View {
     @Environment(LogModel.self) private var model
     @Environment(Router.self) private var router
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         CreamPanel(padding: 20) {
@@ -61,14 +61,14 @@ struct HeroCard: View {
                 OrbitMark().frame(width: 64, height: 44)
             }
             Text(start, style: .timer)
-                .font(.lullSerif(58))
+                .font(.lullaSerif(58))
                 .monospacedDigit()
-                .foregroundStyle(Color.lullInk)
+                .foregroundStyle(Color.lullaInk)
             DashedRule()
             Button {
                 model.mutate { $0.endSleep(at: Date()) }
             } label: {
-                Label("Wake up", systemImage: LullIcon.wake)
+                Label("Wake up", systemImage: LullaIcon.wake)
             }
             .buttonStyle(InkButtonStyle())
             .sensoryFeedback(.success, trigger: snap.sleepStart)
@@ -81,11 +81,11 @@ struct HeroCard: View {
             HStack(alignment: .top) {
                 MonoLabel(p.kind == .bedtime ? "Bedtime window" : "Nap \(p.napNumber) window")
                 Spacer()
-                MonoLabel(phaseTag(phase), color: phase == .late ? Color(hex: 0xB4442E) : .lullInk.opacity(0.7))
+                MonoLabel(phaseTag(phase), color: phase == .late ? Color(hex: 0xB4442E) : .lullaInk.opacity(0.7))
             }
             Text("\(Format.time(p.windowStart))–\(Format.time(p.windowEnd))")
-                .font(.lullSerif(46))
-                .foregroundStyle(Color.lullInk)
+                .font(.lullaSerif(46))
+                .foregroundStyle(Color.lullaInk)
                 .minimumScaleFactor(0.6)
                 .lineLimit(1)
             Group {
@@ -99,7 +99,7 @@ struct HeroCard: View {
                 }
             }
             .font(.system(size: 15))
-            .foregroundStyle(Color.lullInk.opacity(0.8))
+            .foregroundStyle(Color.lullaInk.opacity(0.8))
 
             WakeBar(prediction: p, now: snap.now)
                 .frame(height: 22)
@@ -119,7 +119,7 @@ struct HeroCard: View {
             Button {
                 model.mutate { $0.startSleep(at: Date()) }
             } label: {
-                Label("Start sleep", systemImage: LullIcon.sleep)
+                Label("Start sleep", systemImage: LullaIcon.sleep)
             }
             .buttonStyle(InkButtonStyle())
             .sensoryFeedback(.impact, trigger: snap.sleepStart)
@@ -134,17 +134,17 @@ struct HeroCard: View {
                 OrbitMark().frame(width: 64, height: 44)
             }
             Text("Night waking")
-                .font(.lullSerif(42))
-                .foregroundStyle(Color.lullInk)
+                .font(.lullaSerif(42))
+                .foregroundStyle(Color.lullaInk)
             if let since = snap.awakeSince {
                 Text("Awake \(Format.duration(snap.now.timeIntervalSince(since))). Keep it dim and calm.")
                     .font(.system(size: 15))
-                    .foregroundStyle(Color.lullInk.opacity(0.8))
+                    .foregroundStyle(Color.lullaInk.opacity(0.8))
             }
             Button {
                 model.mutate { $0.startSleep(at: Date()) }
             } label: {
-                Label("Back to sleep", systemImage: LullIcon.sleep)
+                Label("Back to sleep", systemImage: LullaIcon.sleep)
             }
             .buttonStyle(InkButtonStyle())
         }
@@ -154,11 +154,11 @@ struct HeroCard: View {
         VStack(alignment: .leading, spacing: 12) {
             MonoLabel("Next window")
             Text("Start with a sleep.")
-                .font(.lullSerif(40))
-                .foregroundStyle(Color.lullInk)
-            Text("Log the last sleep and Lull shows when the next nap window opens, based on \(snap.babyName)'s age and recent days.")
+                .font(.lullaSerif(40))
+                .foregroundStyle(Color.lullaInk)
+            Text("Log the last sleep and Lulla shows when the next nap window opens, based on \(snap.babyName)'s age and recent days.")
                 .font(.system(size: 15))
-                .foregroundStyle(Color.lullInk.opacity(0.8))
+                .foregroundStyle(Color.lullaInk.opacity(0.8))
             HStack(spacing: 10) {
                 Button("Asleep now") { model.mutate { $0.startSleep(at: Date()) } }
                     .buttonStyle(InkButtonStyle())
@@ -178,8 +178,8 @@ struct HeroCard: View {
 
     private func stat(_ label: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 3) {
-            MonoLabel(label, color: .lullMuted)
-            Text(value).font(.system(size: 15, weight: .medium)).foregroundStyle(Color.lullInk)
+            MonoLabel(label, color: .lullaMuted)
+            Text(value).font(.system(size: 15, weight: .medium)).foregroundStyle(Color.lullaInk)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -191,9 +191,9 @@ struct Tag: View {
 
     var body: some View {
         Text(text.uppercased())
-            .font(.lullMono(9.5))
+            .font(.lullaMono(9.5))
             .tracking(0.8)
-            .foregroundStyle(Color.lullForest)
+            .foregroundStyle(Color.lullaForest)
             .padding(.horizontal, 8)
             .padding(.vertical, 4)
             .background(Color(hex: 0xC8E85A).opacity(0.55), in: Capsule())
@@ -222,10 +222,10 @@ struct WakeBar: View {
                     .frame(width: max(x(prediction.windowEnd) - x(prediction.windowStart), 6), height: 10)
                     .offset(x: x(prediction.windowStart))
                 Capsule()
-                    .fill(Color.lullInk)
+                    .fill(Color.lullaInk)
                     .frame(width: max(x(min(now, end)), 2), height: 2)
                 Circle()
-                    .fill(Color.lullInk)
+                    .fill(Color.lullaInk)
                     .frame(width: 9, height: 9)
                     .offset(x: x(min(now, end)) - 4.5)
             }
@@ -239,7 +239,7 @@ struct WakeBar: View {
 
 struct FeedTimerCard: View {
     @Environment(LogModel.self) private var model
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         CreamPanel {
@@ -247,9 +247,9 @@ struct FeedTimerCard: View {
                 MonoLabel("Feeding" + (snap.feedSide.map { " · \($0.title)" } ?? ""))
                 if let start = snap.feedStart {
                     Text(start, style: .timer)
-                        .font(.lullSerif(44))
+                        .font(.lullaSerif(44))
                         .monospacedDigit()
-                        .foregroundStyle(Color.lullInk)
+                        .foregroundStyle(Color.lullaInk)
                 }
                 HStack(spacing: 10) {
                     if let side = snap.feedSide {
@@ -271,22 +271,22 @@ struct FeedTimerCard: View {
 struct ActionRow: View {
     @Environment(LogModel.self) private var model
     @Environment(Router.self) private var router
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         HStack(spacing: 10) {
             tile(snap.isAsleep ? "Wake" : "Sleep",
-                 icon: snap.isAsleep ? LullIcon.wake : LullIcon.sleep) {
+                 icon: snap.isAsleep ? LullaIcon.wake : LullaIcon.sleep) {
                 model.mutate { d in
                     if d.activeSleep != nil { _ = d.endSleep(at: Date()) } else { _ = d.startSleep(at: Date()) }
                 }
             }
             tile(snap.isFeeding ? "Stop feed" : "Feed",
-                 icon: snap.isFeeding ? "stop.circle" : LullIcon.feed,
+                 icon: snap.isFeeding ? "stop.circle" : LullaIcon.feed,
                  detail: snap.isFeeding || snap.feedingStyle == .bottle ? nil : "Next \(snap.nextSide.short)") {
                 if snap.isFeeding { model.mutate { _ = $0.stopFeed(at: Date()) } } else { router.sheet = .feed }
             }
-            tile("Diaper", icon: LullIcon.diaper) { router.sheet = .diaper }
+            tile("Diaper", icon: LullaIcon.diaper) { router.sheet = .diaper }
         }
     }
 
@@ -296,13 +296,13 @@ struct ActionRow: View {
                 Image(systemName: icon).font(.system(size: 20, weight: .light))
                 VStack(alignment: .leading, spacing: 2) {
                     Text(title).font(.system(size: 15, weight: .medium))
-                    MonoLabel(detail ?? " ", color: .lullMuted)
+                    MonoLabel(detail ?? " ", color: .lullaMuted)
                 }
             }
-            .foregroundStyle(Color.lullInk)
+            .foregroundStyle(Color.lullaInk)
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(14)
-            .background(Color.lullCream.opacity(0.88), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+            .background(Color.lullaCream.opacity(0.88), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
         }
         .buttonStyle(.plain)
         .sensoryFeedback(.selection, trigger: snap.isAsleep)
@@ -315,7 +315,7 @@ struct ActionRow: View {
 /// predicted window and a "now" line.
 struct DayStrip: View {
     let data: LogData
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         let start = snap.now.addingTimeInterval(-18 * 3600)
@@ -327,7 +327,7 @@ struct DayStrip: View {
                 HStack {
                     MonoLabel("Last 18 h")
                     Spacer()
-                    MonoLabel("Next 6 h", color: .lullMuted)
+                    MonoLabel("Next 6 h", color: .lullaMuted)
                 }
                 Canvas { ctx, size in
                     let span = end.timeIntervalSince(start)
@@ -343,8 +343,8 @@ struct DayStrip: View {
                             var p = Path()
                             p.move(to: CGPoint(x: x(tick), y: trackY - 4))
                             p.addLine(to: CGPoint(x: x(tick), y: trackY + trackH + 4))
-                            ctx.stroke(p, with: .color(.lullInk.opacity(0.12)), lineWidth: 0.5)
-                            ctx.draw(Text(String(format: "%02d", h)).font(.lullMono(8.5)).foregroundStyle(Color.lullMuted),
+                            ctx.stroke(p, with: .color(.lullaInk.opacity(0.12)), lineWidth: 0.5)
+                            ctx.draw(Text(String(format: "%02d", h)).font(.lullaMono(8.5)).foregroundStyle(Color.lullaMuted),
                                      at: CGPoint(x: x(tick), y: trackY + trackH + 13))
                         }
                         tick = tick.addingTimeInterval(3600)
@@ -354,7 +354,7 @@ struct DayStrip: View {
                     if let p = snap.prediction {
                         let r = CGRect(x: x(p.windowStart), y: trackY, width: max(x(p.windowEnd) - x(p.windowStart), 4), height: trackH)
                         ctx.fill(Path(roundedRect: r, cornerRadius: 5), with: .color(Color(hex: 0xC8E85A).opacity(0.7)))
-                        ctx.stroke(Path(roundedRect: r, cornerRadius: 5), with: .color(.lullForest.opacity(0.6)),
+                        ctx.stroke(Path(roundedRect: r, cornerRadius: 5), with: .color(.lullaForest.opacity(0.6)),
                                    style: StrokeStyle(lineWidth: 0.8, dash: [2, 2]))
                     }
 
@@ -376,14 +376,14 @@ struct DayStrip: View {
                     }
                     for e in entries where e.kind == .diaper {
                         let cx = x(e.start)
-                        ctx.fill(Path(CGRect(x: cx - 0.75, y: trackY + trackH - 7, width: 1.5, height: 7)), with: .color(.lullForest))
+                        ctx.fill(Path(CGRect(x: cx - 0.75, y: trackY + trackH - 7, width: 1.5, height: 7)), with: .color(.lullaForest))
                     }
 
                     // Now.
                     var now = Path()
                     now.move(to: CGPoint(x: x(snap.now), y: 0))
                     now.addLine(to: CGPoint(x: x(snap.now), y: trackY + trackH + 4))
-                    ctx.stroke(now, with: .color(.lullInk), style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
+                    ctx.stroke(now, with: .color(.lullaInk), style: StrokeStyle(lineWidth: 1, dash: [2, 2]))
                 }
                 .frame(height: 62)
 
@@ -399,7 +399,7 @@ struct DayStrip: View {
     private func legend(_ color: Color, _ text: String) -> some View {
         HStack(spacing: 5) {
             Circle().fill(color).frame(width: 7, height: 7)
-            MonoLabel(text, color: .lullMuted)
+            MonoLabel(text, color: .lullaMuted)
         }
     }
 }
@@ -407,7 +407,7 @@ struct DayStrip: View {
 // MARK: - Summary
 
 struct SummaryCard: View {
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         CreamPanel(padding: 16) {
@@ -421,11 +421,11 @@ struct SummaryCard: View {
                 }
                 DashedRule()
                 HStack {
-                    MonoLabel("Last feed", color: .lullMuted)
+                    MonoLabel("Last feed", color: .lullaMuted)
                     Spacer()
                     Text(snap.lastFeed.map { "\(snap.lastFeedPhrase) · \(Format.feedLabel($0, unit: snap.volumeUnit, now: snap.now))" } ?? "—")
                         .font(.system(size: 14))
-                        .foregroundStyle(Color.lullInk)
+                        .foregroundStyle(Color.lullaInk)
                 }
             }
         }
@@ -433,8 +433,8 @@ struct SummaryCard: View {
 
     private func stat(_ label: String, _ value: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(value).font(.lullSerif(24)).foregroundStyle(Color.lullInk).lineLimit(1).minimumScaleFactor(0.7)
-            MonoLabel(label, color: .lullMuted)
+            Text(value).font(.lullaSerif(24)).foregroundStyle(Color.lullaInk).lineLimit(1).minimumScaleFactor(0.7)
+            MonoLabel(label, color: .lullaMuted)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -446,7 +446,7 @@ struct RecentCard: View {
     @Environment(Router.self) private var router
     @Environment(LogModel.self) private var model
     let data: LogData
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         let recent = Array(data.entries
@@ -460,13 +460,13 @@ struct RecentCard: View {
                     MonoLabel("Last 24 h")
                     Spacer()
                     Menu {
-                        Button("Sleep", systemImage: LullIcon.sleep) { router.sheet = .add(.sleep) }
-                        Button("Feed", systemImage: LullIcon.feed) { router.sheet = .add(.feed) }
-                        Button("Diaper", systemImage: LullIcon.diaper) { router.sheet = .add(.diaper) }
+                        Button("Sleep", systemImage: LullaIcon.sleep) { router.sheet = .add(.sleep) }
+                        Button("Feed", systemImage: LullaIcon.feed) { router.sheet = .add(.feed) }
+                        Button("Diaper", systemImage: LullaIcon.diaper) { router.sheet = .add(.diaper) }
                     } label: {
                         Label("Add", systemImage: "plus")
-                            .font(.lullMono(11))
-                            .foregroundStyle(Color.lullInk)
+                            .font(.lullaMono(11))
+                            .foregroundStyle(Color.lullaInk)
                     }
                 }
                 .padding(.bottom, 8)
@@ -474,7 +474,7 @@ struct RecentCard: View {
                 if recent.isEmpty {
                     Text("Nothing logged in the last day.")
                         .font(.system(size: 14))
-                        .foregroundStyle(Color.lullMuted)
+                        .foregroundStyle(Color.lullaMuted)
                         .padding(.vertical, 10)
                 }
                 ForEach(recent) { e in
@@ -501,25 +501,25 @@ struct EntryRow: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Image(systemName: LullIcon.symbol(for: entry))
+            Image(systemName: LullaIcon.symbol(for: entry))
                 .font(.system(size: 14, weight: .light))
                 .frame(width: 30, height: 30)
-                .background(Circle().stroke(Color.lullInk.opacity(0.2), lineWidth: 0.75))
+                .background(Circle().stroke(Color.lullaInk.opacity(0.2), lineWidth: 0.75))
             VStack(alignment: .leading, spacing: 2) {
                 Text(Format.title(entry, unit: unit, now: now))
                     .font(.system(size: 15))
                 if entry.isRunning {
                     MonoLabel("Running", color: Color(hex: 0x1F8A5B))
                 } else if let note = entry.note, !note.isEmpty {
-                    Text(note).font(.system(size: 12)).foregroundStyle(Color.lullMuted).lineLimit(1)
+                    Text(note).font(.system(size: 12)).foregroundStyle(Color.lullaMuted).lineLimit(1)
                 }
             }
             Spacer()
             Text(timeText)
-                .font(.lullMono(11))
-                .foregroundStyle(Color.lullMuted)
+                .font(.lullaMono(11))
+                .foregroundStyle(Color.lullaMuted)
         }
-        .foregroundStyle(Color.lullInk)
+        .foregroundStyle(Color.lullaInk)
         .padding(.vertical, 10)
         .contentShape(Rectangle())
     }

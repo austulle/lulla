@@ -4,7 +4,7 @@ import WidgetKit
 
 /// The single write path used by the app, widgets, controls and Siri:
 /// mutate the shared log, then refresh every surface that shows it.
-enum LullActions {
+enum LullaActions {
     @discardableResult
     static func perform(_ body: (inout LogData) -> Void) async -> LogData {
         let data = LogStore.shared.update(body)
@@ -60,7 +60,7 @@ enum LullActions {
 /// Cross-process "the log changed" ping so the running app reloads when a
 /// widget button or Siri wrote to the shared file.
 enum ChangeSignal {
-    static let name = "com.lull.baby.log-changed" as CFString
+    static let name = "com.lulla.baby.log-changed" as CFString
 
     static func post() {
         CFNotificationCenterPostNotification(
@@ -70,7 +70,7 @@ enum ChangeSignal {
 
 /// Local notification when the next nap window is about to open.
 enum NapAlerts {
-    static let id = "lull.nap-window"
+    static let id = "lulla.nap-window"
 
     static func reschedule(_ data: LogData, now: Date = Date()) async {
         let center = UNUserNotificationCenter.current()

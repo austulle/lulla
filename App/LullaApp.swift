@@ -1,7 +1,7 @@
 import SwiftUI
 
 @main
-struct LullApp: App {
+struct LullaApp: App {
     @State private var model = LogModel()
     @State private var router = Router()
     @Environment(\.scenePhase) private var scenePhase
@@ -53,16 +53,16 @@ final class LogModel {
     func reloadAndRefresh() {
         reload()
         let snapshot = data
-        Task { await LullActions.refreshSurfaces(snapshot) }
+        Task { await LullaActions.refreshSurfaces(snapshot) }
     }
 
     func mutate(_ body: (inout LogData) -> Void) {
         data = LogStore.shared.update(body)
         let snapshot = data
-        Task { await LullActions.refreshSurfaces(snapshot) }
+        Task { await LullaActions.refreshSurfaces(snapshot) }
     }
 
-    var snapshotNow: LullSnapshot { LullSnapshot.make(data, now: Date()) }
+    var snapshotNow: LullaSnapshot { LullaSnapshot.make(data, now: Date()) }
 
     private func observeExternalChanges() {
         let observer = Unmanaged.passUnretained(self).toOpaque()
@@ -77,7 +77,7 @@ final class LogModel {
     }
 }
 
-/// Sheets and deep links (lull://feed, lull://sleep, lull://diaper).
+/// Sheets and deep links (lulla://feed, lulla://sleep, lulla://diaper).
 @MainActor @Observable
 final class Router {
     enum Sheet: Identifiable, Equatable {
@@ -100,7 +100,7 @@ final class Router {
     var sheet: Sheet?
 
     func handle(_ url: URL) {
-        guard url.scheme == "lull" else { return }
+        guard url.scheme == "lulla" else { return }
         switch url.host() {
         case "feed": sheet = .feed
         case "diaper": sheet = .diaper

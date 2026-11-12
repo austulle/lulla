@@ -2,7 +2,7 @@ import Foundation
 
 /// Everything a screen, widget or Siri answer needs, computed once from the
 /// log at a given moment.
-struct LullSnapshot: Hashable, Sendable {
+struct LullaSnapshot: Hashable, Sendable {
     enum Mood: String, Sendable { case awake, asleep, feeding, night }
 
     var now: Date
@@ -38,7 +38,7 @@ struct LullSnapshot: Hashable, Sendable {
         return h >= 20 || h < 6
     }
 
-    static func make(_ data: LogData, now: Date, calendar: Calendar = .current) -> LullSnapshot {
+    static func make(_ data: LogData, now: Date, calendar: Calendar = .current) -> LullaSnapshot {
         let predictor = NapPredictor(calendar: calendar)
         let prediction = predictor.predict(data, now: now)
         let lastSleep = data.lastCompletedSleep
@@ -63,7 +63,7 @@ struct LullSnapshot: Hashable, Sendable {
         }.count
 
         let profile = data.profile
-        return LullSnapshot(
+        return LullaSnapshot(
             now: now,
             hasProfile: profile != nil,
             babyName: profile?.displayName ?? "Baby",

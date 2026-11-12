@@ -7,10 +7,10 @@ import WidgetKit
 
 struct SnapshotEntry: TimelineEntry {
     let date: Date
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 }
 
-struct LullProvider: TimelineProvider {
+struct LullaProvider: TimelineProvider {
     func placeholder(in context: Context) -> SnapshotEntry {
         SnapshotEntry(date: .now, snap: .sample(now: .now))
     }
@@ -18,7 +18,7 @@ struct LullProvider: TimelineProvider {
     func getSnapshot(in context: Context, completion: @escaping (SnapshotEntry) -> Void) {
         let data = LogStore.shared.load()
         let now = Date()
-        let snap = (context.isPreview && data.profile == nil) ? LullSnapshot.sample(now: now) : LullSnapshot.make(data, now: now)
+        let snap = (context.isPreview && data.profile == nil) ? LullaSnapshot.sample(now: now) : LullaSnapshot.make(data, now: now)
         completion(SnapshotEntry(date: now, snap: snap))
     }
 
@@ -30,25 +30,25 @@ struct LullProvider: TimelineProvider {
         let now = Date()
         let entries = (0..<36).map { i -> SnapshotEntry in
             let date = now.addingTimeInterval(Double(i) * 300)
-            return SnapshotEntry(date: date, snap: LullSnapshot.make(data, now: date))
+            return SnapshotEntry(date: date, snap: LullaSnapshot.make(data, now: date))
         }
         completion(Timeline(entries: entries, policy: .atEnd))
     }
 }
 
-struct LullWidget: Widget {
+struct LullaWidget: Widget {
     var body: some WidgetConfiguration {
-        StaticConfiguration(kind: "LullWidget", provider: LullProvider()) { entry in
-            LullWidgetView(entry: entry)
+        StaticConfiguration(kind: "LullaWidget", provider: LullaProvider()) { entry in
+            LullaWidgetView(entry: entry)
         }
-        .configurationDisplayName("Lull")
+        .configurationDisplayName("Lulla")
         .description("The next nap window, running timers and the last feed.")
         .supportedFamilies([.systemSmall, .systemMedium, .accessoryCircular, .accessoryRectangular, .accessoryInline])
         .contentMarginsDisabled()
     }
 }
 
-struct LullWidgetView: View {
+struct LullaWidgetView: View {
     @Environment(\.widgetFamily) private var family
     let entry: SnapshotEntry
 
@@ -84,7 +84,7 @@ struct WidgetStatus {
     let caption: Text
     let icon: String
 
-    init(_ s: LullSnapshot) {
+    init(_ s: LullaSnapshot) {
         if let start = s.feedStart {
             label = "Feeding" + (s.feedSide.map { " · \($0.short)" } ?? "")
             big = .timer(start)
@@ -117,15 +117,15 @@ struct WidgetStatus {
         } else {
             label = "Next nap"
             big = .text("—")
-            caption = Text(s.hasProfile ? "log a sleep" : "open Lull")
+            caption = Text(s.hasProfile ? "log a sleep" : "open Lulla")
             icon = "moon.zzz"
         }
     }
 
     @ViewBuilder func bigView(size: CGFloat) -> some View {
         switch big {
-        case .text(let t): Text(t).font(.lullSerif(size)).minimumScaleFactor(0.6).lineLimit(1)
-        case .timer(let d): Text(d, style: .timer).font(.lullSerif(size)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
+        case .text(let t): Text(t).font(.lullaSerif(size)).minimumScaleFactor(0.6).lineLimit(1)
+        case .timer(let d): Text(d, style: .timer).font(.lullaSerif(size)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
         }
     }
 }
@@ -133,7 +133,7 @@ struct WidgetStatus {
 // MARK: - Home Screen
 
 struct SmallWidget: View {
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         let st = WidgetStatus(snap)
@@ -153,21 +153,21 @@ struct SmallWidget: View {
             VStack(alignment: .leading, spacing: 2) {
                 MonoLabel(st.label)
                 st.bigView(size: 32)
-                    .foregroundStyle(Color.lullInk)
+                    .foregroundStyle(Color.lullaInk)
                 st.caption
-                    .font(.lullMono(10.5))
-                    .foregroundStyle(Color.lullMuted)
+                    .font(.lullaMono(10.5))
+                    .foregroundStyle(Color.lullaMuted)
             }
             .padding(12)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color.lullCream)
+            .background(Color.lullaCream)
         }
-        .widgetURL(URL(string: "lull://today"))
+        .widgetURL(URL(string: "lulla://today"))
     }
 }
 
 struct MediumWidget: View {
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         let st = WidgetStatus(snap)
@@ -180,7 +180,7 @@ struct MediumWidget: View {
                 }
                 .foregroundStyle(ink)
                 st.bigView(size: 38).foregroundStyle(ink).padding(.top, 6)
-                st.caption.font(.lullMono(10.5)).foregroundStyle(ink.opacity(0.8))
+                st.caption.font(.lullaMono(10.5)).foregroundStyle(ink.opacity(0.8))
                 Spacer(minLength: 0)
             }
             .padding(14)
@@ -189,11 +189,11 @@ struct MediumWidget: View {
             VStack(alignment: .leading, spacing: 6) {
                 MonoLabel("Last feed")
                 Text(snap.lastFeedPhrase)
-                    .font(.lullSerif(19))
-                    .foregroundStyle(Color.lullInk)
+                    .font(.lullaSerif(19))
+                    .foregroundStyle(Color.lullaInk)
                     .lineLimit(1)
                     .minimumScaleFactor(0.7)
-                MonoLabel(feedDetail, color: .lullMuted)
+                MonoLabel(feedDetail, color: .lullaMuted)
                 Spacer(minLength: 0)
                 HStack(spacing: 6) {
                     Button(intent: ToggleSleepIntent()) {
@@ -202,7 +202,7 @@ struct MediumWidget: View {
                     Button(intent: ToggleFeedIntent()) {
                         pill(snap.isFeeding ? "stop.fill" : "drop", filled: snap.isFeeding)
                     }
-                    Link(destination: URL(string: "lull://diaper")!) {
+                    Link(destination: URL(string: "lulla://diaper")!) {
                         pill("circle.dotted.circle", filled: false)
                     }
                 }
@@ -211,9 +211,9 @@ struct MediumWidget: View {
             .padding(12)
             .frame(width: 150)
             .frame(maxHeight: .infinity, alignment: .topLeading)
-            .background(Color.lullCream)
+            .background(Color.lullaCream)
         }
-        .widgetURL(URL(string: "lull://today"))
+        .widgetURL(URL(string: "lulla://today"))
     }
 
     private var feedDetail: String {
@@ -225,16 +225,16 @@ struct MediumWidget: View {
     private func pill(_ symbol: String, filled: Bool) -> some View {
         Image(systemName: symbol)
             .font(.system(size: 14, weight: .medium))
-            .foregroundStyle(filled ? Color.lullCream : Color.lullInk)
+            .foregroundStyle(filled ? Color.lullaCream : Color.lullaInk)
             .frame(maxWidth: .infinity, minHeight: 34)
-            .background(filled ? Color.lullInk : Color.lullInk.opacity(0.08), in: Capsule())
+            .background(filled ? Color.lullaInk : Color.lullaInk.opacity(0.08), in: Capsule())
     }
 }
 
 // MARK: - Lock Screen
 
 struct CircularWidget: View {
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         Group {
@@ -264,7 +264,7 @@ struct CircularWidget: View {
                 Image(systemName: "moon.zzz").font(.system(size: 20))
             }
         }
-        .widgetURL(URL(string: "lull://today"))
+        .widgetURL(URL(string: "lulla://today"))
     }
 
     private func progress(_ p: NapPrediction) -> Double {
@@ -275,7 +275,7 @@ struct CircularWidget: View {
 }
 
 struct RectangularWidget: View {
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         let st = WidgetStatus(snap)
@@ -294,12 +294,12 @@ struct RectangularWidget: View {
                 .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .widgetURL(URL(string: "lull://today"))
+        .widgetURL(URL(string: "lulla://today"))
     }
 }
 
 struct InlineWidget: View {
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         if let start = snap.sleepStart {
@@ -314,9 +314,9 @@ struct InlineWidget: View {
 
 // MARK: - Preview data
 
-extension LullSnapshot {
+extension LullaSnapshot {
     /// Gallery preview before any data exists.
-    static func sample(now: Date) -> LullSnapshot {
+    static func sample(now: Date) -> LullaSnapshot {
         var profile = BabyProfile(name: "Mila", birthDate: now.addingTimeInterval(-100 * 86400))
         profile.feedingStyle = .breast
         let data = LogData(profile: profile, entries: [

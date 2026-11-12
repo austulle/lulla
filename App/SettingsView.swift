@@ -22,7 +22,7 @@ struct SettingsView: View {
                             set: { profile.dueDate = $0 }
                         ), in: profile.birthDate..., displayedComponents: .date)
                         Text("Wake windows use the corrected age (from the due date) until 2 years.")
-                            .font(.footnote).foregroundStyle(Color.lullMuted)
+                            .font(.footnote).foregroundStyle(Color.lullaMuted)
                     }
                 }
 
@@ -39,7 +39,7 @@ struct SettingsView: View {
                         Text("Usual bottle  \(Format.volume(ml: profile.defaultBottleML, unit: profile.volumeUnit))")
                     }
                     Text("The widget and Control Center feed button logs the usual bottle when you mostly bottle-feed, and starts a timer on the next side otherwise.")
-                        .font(.footnote).foregroundStyle(Color.lullMuted)
+                        .font(.footnote).foregroundStyle(Color.lullaMuted)
                 }
 
                 Section("Nap alerts") {
@@ -55,27 +55,27 @@ struct SettingsView: View {
                     row("Typical naps", "\(band.naps)")
                     row("First window", range(band.first))
                     row("Before bedtime", range(band.last))
-                    Text("Lull starts from these typical ranges, then leans up to halfway toward what has worked for \(profile.displayName) over the last 7 days (windows followed by a nap of 40+ minutes). After a short nap, the next window is shortened by 15%. These are estimates, not medical advice — follow your baby's sleepy cues and your pediatrician.")
-                        .font(.footnote).foregroundStyle(Color.lullMuted)
+                    Text("Lulla starts from these typical ranges, then leans up to halfway toward what has worked for \(profile.displayName) over the last 7 days (windows followed by a nap of 40+ minutes). After a short nap, the next window is shortened by 15%. These are estimates, not medical advice — follow your baby's sleepy cues and your pediatrician.")
+                        .font(.footnote).foregroundStyle(Color.lullaMuted)
                 }
 
                 Section("Widgets, Siri & controls") {
-                    help("Home Screen", "Long-press the Home Screen → Edit → Add Widget → Lull. The medium size has sleep and feed buttons.")
-                    help("Lock Screen", "Long-press the Lock Screen → Customize → add Lull to the widget row, and Lull's Sleep or Feed control to the bottom corners.")
-                    help("Siri & Shortcuts", "Say “Start sleep in Lull”, “Next nap in Lull” or “Log a bottle in Lull”. All actions are in the Shortcuts app and can go on the Action button.")
+                    help("Home Screen", "Long-press the Home Screen → Edit → Add Widget → Lulla. The medium size has sleep and feed buttons.")
+                    help("Lock Screen", "Long-press the Lock Screen → Customize → add Lulla to the widget row, and Lulla's Sleep or Feed control to the bottom corners.")
+                    help("Siri & Shortcuts", "Say “Start sleep in Lulla”, “Next nap in Lulla” or “Log a bottle in Lulla”. All actions are in the Shortcuts app and can go on the Action button.")
                     help("Live Activity", "Running sleep and feeding timers appear on the Lock Screen and in the Dynamic Island.")
                 }
 
                 Section("Data") {
                     ShareLink(item: CSVExport(data: model.data),
-                              preview: SharePreview("lull-log.csv")) {
+                              preview: SharePreview("lulla-log.csv")) {
                         Label("Export CSV", systemImage: "square.and.arrow.up")
                     }
                     Button("Erase all entries", role: .destructive) { confirmReset = true }
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(Color.lullCream)
+            .background(Color.lullaCream)
             .navigationTitle("Settings")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
@@ -99,7 +99,7 @@ struct SettingsView: View {
                 if on { Task { await NapAlerts.requestPermission() } }
             }
         }
-        .tint(.lullInk)
+        .tint(.lullaInk)
     }
 
     private func save(_ p: BabyProfile) {
@@ -115,14 +115,14 @@ struct SettingsView: View {
         HStack {
             Text(label)
             Spacer()
-            Text(value).foregroundStyle(Color.lullMuted)
+            Text(value).foregroundStyle(Color.lullaMuted)
         }
     }
 
     private func help(_ title: String, _ text: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(title).font(.subheadline.weight(.medium))
-            Text(text).font(.footnote).foregroundStyle(Color.lullMuted)
+            Text(text).font(.footnote).foregroundStyle(Color.lullaMuted)
         }
         .padding(.vertical, 2)
     }
@@ -136,7 +136,7 @@ struct CSVExport: Transferable {
         DataRepresentation(exportedContentType: .commaSeparatedText) { export in
             Data(export.csv.utf8)
         }
-        .suggestedFileName("lull-log.csv")
+        .suggestedFileName("lulla-log.csv")
     }
 
     var csv: String {

@@ -9,7 +9,7 @@ struct TodayView: View {
         let data = model.data // read outside the TimelineView so Observation tracks it
 
         TimelineView(.everyMinute) { context in
-            let snap = LullSnapshot.make(data, now: context.date)
+            let snap = LullaSnapshot.make(data, now: context.date)
             ZStack {
                 GradientBackdrop(mood: snap.mood).ignoresSafeArea()
                 ScrollView {
@@ -22,7 +22,7 @@ struct TodayView: View {
                         SummaryCard(snap: snap)
                         RecentCard(data: data, snap: snap)
                         Text("Nap windows are age-based estimates, not medical advice.")
-                            .font(.lullMono(9.5))
+                            .font(.lullaMono(9.5))
                             .foregroundStyle(snap.mood.onGradient.opacity(0.6))
                             .frame(maxWidth: .infinity)
                             .padding(.top, 8)
@@ -56,13 +56,13 @@ struct SheetHost: View {
 
 private struct TopBar: View {
     @Environment(Router.self) private var router
-    let snap: LullSnapshot
+    let snap: LullaSnapshot
 
     var body: some View {
         let ink = snap.mood.onGradient
         VStack(alignment: .leading, spacing: 18) {
             HStack {
-                MonoLabel("Lull", color: ink)
+                MonoLabel("Lulla", color: ink)
                 Spacer()
                 MonoLabel(snap.now.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)), color: ink.opacity(0.75))
                 Button { router.sheet = .history } label: {
@@ -79,7 +79,7 @@ private struct TopBar: View {
 
             HStack(alignment: .firstTextBaseline) {
                 Text(snap.babyName)
-                    .font(.lullSerif(40))
+                    .font(.lullaSerif(40))
                     .foregroundStyle(ink)
                 Spacer()
                 MonoLabel(snap.ageText, color: ink.opacity(0.8))

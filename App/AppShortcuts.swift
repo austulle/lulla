@@ -2,7 +2,7 @@ import AppIntents
 
 /// Zero-setup Siri phrases and Shortcuts-app tiles. Each also shows up for
 /// the Action button and Spotlight.
-struct LullShortcuts: AppShortcutsProvider {
+struct LullaShortcuts: AppShortcutsProvider {
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
             intent: StartSleepIntent(),

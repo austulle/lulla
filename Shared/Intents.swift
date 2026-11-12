@@ -56,7 +56,7 @@ struct StartSleepIntent: LiveActivityIntent {
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let start = Date().addingTimeInterval(-Double(min(max(minutesAgo, 0), 240)) * 60)
         var started = false
-        await LullActions.perform { started = $0.startSleep(at: start) }
+        await LullaActions.perform { started = $0.startSleep(at: start) }
         let name = babyName()
         let message = started ? "Sleep started for \(name)." : "\(name) is already asleep."
         return .result(dialog: "\(message)")
@@ -71,9 +71,9 @@ struct EndSleepIntent: LiveActivityIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         var ended: Entry?
-        let data = await LullActions.perform { ended = $0.endSleep(at: Date()) }
+        let data = await LullaActions.perform { ended = $0.endSleep(at: Date()) }
         guard let ended else { return .result(dialog: "No sleep is running.") }
-        let snap = LullSnapshot.make(data, now: Date())
+        let snap = LullaSnapshot.make(data, now: Date())
         return .result(dialog: "Slept \(Format.duration(ended.duration())). \(snap.napPhrase).")
     }
 }
@@ -85,7 +85,7 @@ struct ToggleSleepIntent: LiveActivityIntent {
     init() {}
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let asleep = await LullActions.toggleSleep()
+        let asleep = await LullaActions.toggleSleep()
         let message = asleep ? "Sleep started." : "Sleep ended."
         return .result(dialog: "\(message)")
     }
@@ -102,7 +102,7 @@ struct SetSleepIntent: SetValueIntent, LiveActivityIntent {
 
     func perform() async throws -> some IntentResult {
         let now = Date()
-        await LullActions.perform { d in
+        await LullaActions.perform { d in
             if value { _ = d.startSleep(at: now) } else { _ = d.endSleep(at: now) }
         }
         return .result()
@@ -127,7 +127,7 @@ struct StartBreastfeedingIntent: LiveActivityIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         var chosen = BreastSide.left
-        await LullActions.perform { d in
+        await LullaActions.perform { d in
             chosen = side?.side ?? d.suggestedSide
             d.startBreast(chosen, at: Date())
         }
@@ -143,7 +143,7 @@ struct StopFeedingIntent: LiveActivityIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         var stopped: Entry?
-        let data = await LullActions.perform { stopped = $0.stopFeed(at: Date()) }
+        let data = await LullaActions.perform { stopped = $0.stopFeed(at: Date()) }
         guard let stopped else { return .result(dialog: "No feed is running.") }
         let unit = data.profile?.volumeUnit ?? .ml
         return .result(dialog: "Logged \(Format.feedLabel(stopped, unit: unit)). Next side: \(data.suggestedSide.title.lowercased()).")
@@ -161,12 +161,12 @@ struct SetFeedingIntent: SetValueIntent, LiveActivityIntent {
 
     func perform() async throws -> some IntentResult {
         let running = LogStore.shared.load().activeFeed != nil
-        if value != running { await LullActions.toggleFeed() }
+        if value != running { await LullaActions.toggleFeed() }
         return .result()
     }
 }
 
-/// Widget / control feed button (see `LullActions.toggleFeed`).
+/// Widget / control feed button (see `LullaActions.toggleFeed`).
 struct ToggleFeedIntent: LiveActivityIntent {
     static let title: LocalizedStringResource = "Toggle Feeding"
     static let description = IntentDescription("Stops the running feed, or starts one on the suggested side (or logs your usual bottle).")
@@ -174,7 +174,7 @@ struct ToggleFeedIntent: LiveActivityIntent {
     init() {}
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        switch await LullActions.toggleFeed() {
+        switch await LullaActions.toggleFeed() {
         case .stopped(let e): return .result(dialog: "Feed logged: \(Format.duration(e.duration())).")
         case .startedBreast(let s): return .result(dialog: "Feeding started on the \(s.title.lowercased()) side.")
         case .loggedBottle(let ml):
@@ -186,9 +186,9 @@ struct ToggleFeedIntent: LiveActivityIntent {
 
 struct LogBottleIntent: AppIntent {
     static let title: LocalizedStringResource = "Log Bottle"
-    static let description = IntentDescription("Logs a bottle feed, in the unit set in Lull.")
+    static let description = IntentDescription("Logs a bottle feed, in the unit set in Lulla.")
 
-    @Parameter(title: "Amount", description: "In ml or oz, as set in Lull's settings.")
+    @Parameter(title: "Amount", description: "In ml or oz, as set in Lulla's settings.")
     var amount: Double
 
     @Parameter(title: "Contents")
@@ -202,7 +202,7 @@ struct LogBottleIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         var unit = VolumeUnit.ml
-        await LullActions.perform { d in
+        await LullaActions.perform { d in
             unit = d.profile?.volumeUnit ?? .ml
             let ml = unit == .oz ? amount * VolumeUnit.mlPerOz : amount
             d.add(.bottle(ml: ml, content: contents?.content, at: Date()))
@@ -230,7 +230,7 @@ struct LogDiaperIntent: AppIntent {
 
     func perform() async throws -> some IntentResult & ProvidesDialog {
         let diaper = kind.kind
-        await LullActions.perform { $0.add(.diaper(diaper, at: Date())) }
+        await LullaActions.perform { $0.add(.diaper(diaper, at: Date())) }
         return .result(dialog: "Diaper logged.")
     }
 }
@@ -244,7 +244,7 @@ struct NextNapIntent: AppIntent {
     init() {}
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
-        let snap = LullSnapshot.make(LogStore.shared.load(), now: Date())
+        let snap = LullaSnapshot.make(LogStore.shared.load(), now: Date())
         var phrase = snap.napPhrase
         if let since = snap.awakeSince, !snap.isAsleep {
             phrase += ". Awake for \(Format.duration(Date().timeIntervalSince(since)))"
@@ -260,7 +260,7 @@ struct LastFeedIntent: AppIntent {
     init() {}
 
     func perform() async throws -> some IntentResult & ReturnsValue<String> & ProvidesDialog {
-        let snap = LullSnapshot.make(LogStore.shared.load(), now: Date())
+        let snap = LullaSnapshot.make(LogStore.shared.load(), now: Date())
         guard let feed = snap.lastFeed else {
             return .result(value: "No feeds yet", dialog: "No feeds logged yet.")
         }

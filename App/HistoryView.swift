@@ -19,7 +19,7 @@ struct HistoryView: View {
         NavigationStack {
             List {
                 if days.isEmpty {
-                    Text("Nothing logged yet.").foregroundStyle(Color.lullMuted)
+                    Text("Nothing logged yet.").foregroundStyle(Color.lullaMuted)
                 }
                 ForEach(days) { day in
                     Section {
@@ -37,14 +37,14 @@ struct HistoryView: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            .background(Color.lullCream)
+            .background(Color.lullaCream)
             .navigationTitle("History")
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } }
             }
             .sheet(item: $editing) { EntryEditor(entry: $0, isNew: false) }
         }
-        .tint(.lullInk)
+        .tint(.lullaInk)
     }
 
     private func header(_ day: Day, data: LogData, unit: VolumeUnit) -> some View {
@@ -54,12 +54,12 @@ struct HistoryView: View {
         parts.append("\(t.diapers) diapers")
         return VStack(alignment: .leading, spacing: 4) {
             Text(day.start.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                .font(.lullSerif(20))
-                .foregroundStyle(Color.lullInk)
+                .font(.lullaSerif(20))
+                .foregroundStyle(Color.lullaInk)
                 .textCase(nil)
             Text(parts.joined(separator: " · ").uppercased())
-                .font(.lullMono(9.5))
-                .foregroundStyle(Color.lullMuted)
+                .font(.lullaMono(9.5))
+                .foregroundStyle(Color.lullaMuted)
         }
         .padding(.vertical, 4)
     }

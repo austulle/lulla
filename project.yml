@@ -1,4 +1,4 @@
-name: Lull
+name: Lulla
 options:
   deploymentTarget:
     iOS: "18.0"
@@ -11,18 +11,18 @@ settings:
     CURRENT_PROJECT_VERSION: "1"
     TARGETED_DEVICE_FAMILY: "1"
 targets:
-  Lull:
+  Lulla:
     type: application
     platform: iOS
     sources: [App, Shared, Core]
     dependencies:
-      - target: LullWidgets
+      - target: LullaWidgets
     scheme:
-      testTargets: [LullTests]
+      testTargets: [LullaTests]
     info:
       path: App/Info.plist
       properties:
-        CFBundleDisplayName: Lull
+        CFBundleDisplayName: Lulla
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         ITSAppUsesNonExemptEncryption: false
@@ -31,37 +31,37 @@ targets:
           UIColorName: AccentColor
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         CFBundleURLTypes:
-          - CFBundleURLName: com.lull.baby
-            CFBundleURLSchemes: [lull]
+          - CFBundleURLName: com.lulla.baby
+            CFBundleURLSchemes: [lulla]
     entitlements:
-      path: App/Lull.entitlements
+      path: App/Lulla.entitlements
       properties:
-        com.apple.security.application-groups: [group.com.lull.baby]
+        com.apple.security.application-groups: [group.com.lulla.baby]
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.lull.baby
+        PRODUCT_BUNDLE_IDENTIFIER: com.lulla.baby
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
-  LullWidgets:
+  LullaWidgets:
     type: app-extension
     platform: iOS
     sources: [Widgets, Shared, Core]
     info:
       path: Widgets/Info.plist
       properties:
-        CFBundleDisplayName: Lull
+        CFBundleDisplayName: Lulla
         CFBundleShortVersionString: $(MARKETING_VERSION)
         CFBundleVersion: $(CURRENT_PROJECT_VERSION)
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
-      path: Widgets/LullWidgets.entitlements
+      path: Widgets/LullaWidgets.entitlements
       properties:
-        com.apple.security.application-groups: [group.com.lull.baby]
+        com.apple.security.application-groups: [group.com.lulla.baby]
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.lull.baby.widgets
-  LullTests:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lulla.baby.widgets
+  LullaTests:
     type: bundle.unit-test
     platform: iOS
     sources: [Tests]
@@ -69,4 +69,4 @@ targets:
       base:
         GENERATE_INFOPLIST_FILE: true
     dependencies:
-      - target: Lull
+      - target: Lulla

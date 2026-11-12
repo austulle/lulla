@@ -1,4 +1,4 @@
-# Lull
+# Lulla
 
 A small native iOS app for tracking a baby's sleep, feeds and diapers.
 It shows the next nap window, has widgets for the Home Screen and Lock
@@ -14,18 +14,18 @@ All data is stored in one JSON file in the App Group, on the device.
 git clone https://github.com/austulle/lulla && cd lulla
 brew install xcodegen      # once
 xcodegen generate
-open Lull.xcodeproj        # or:
-xcodebuild -project Lull.xcodeproj -scheme Lull \
+open Lulla.xcodeproj        # or:
+xcodebuild -project Lulla.xcodeproj -scheme Lulla \
   -destination 'platform=iOS Simulator,name=iPhone 17 Pro' test
 ```
 
-Signing uses team `Y3V978URTC` with bundle ids `com.lull.baby` and
-`com.lull.baby.widgets` and App Group `group.com.lull.baby`. To use your own
+Signing uses team `Y3V978URTC` with bundle ids `com.lulla.baby` and
+`com.lulla.baby.widgets` and App Group `group.com.lulla.baby`. To use your own
 ids, change all three in `project.yml` and set `LogStore.appGroup` to match.
 Xcode's automatic signing registers the App Group the first time you build.
 
 The core logic (`Core/`) is plain Foundation. Its 17 tests also run on Linux
-with SwiftPM: point a package target named `Lull` at `Core/` and a test
+with SwiftPM: point a package target named `Lulla` at `Core/` and a test
 target at `Tests/`.
 
 ## How the nap window works (`Core/NapPredictor.swift`)
@@ -60,15 +60,15 @@ Settings.
 
 | Surface | Where |
 |---|---|
-| Home Screen widget, small and medium (with Sleep / Feed / Diaper buttons) | `Widgets/LullWidget.swift` |
-| Lock Screen widgets: circular gauge to the next window, rectangular, inline | `Widgets/LullWidget.swift` |
-| Control Center and Lock Screen corner controls: Sleep and Feed toggles | `Widgets/LullWidgetBundle.swift` |
-| Live Activity and Dynamic Island for running sleep or feed timers, with buttons | `Widgets/LullLiveActivity.swift` |
+| Home Screen widget, small and medium (with Sleep / Feed / Diaper buttons) | `Widgets/LullaWidget.swift` |
+| Lock Screen widgets: circular gauge to the next window, rectangular, inline | `Widgets/LullaWidget.swift` |
+| Control Center and Lock Screen corner controls: Sleep and Feed toggles | `Widgets/LullaWidgetBundle.swift` |
+| Live Activity and Dynamic Island for running sleep or feed timers, with buttons | `Widgets/LullaLiveActivity.swift` |
 | Siri phrases and Shortcuts actions (start/end sleep, start/stop feeding, log bottle, log diaper, next nap, last feed) | `Shared/Intents.swift`, `App/AppShortcuts.swift` |
-| Nap-window notification, sent N minutes before the window opens | `Shared/LullActions.swift` (`NapAlerts`) |
-| Deep links: `lull://feed`, `lull://diaper`, `lull://history` | `App/LullApp.swift` |
+| Nap-window notification, sent N minutes before the window opens | `Shared/LullaActions.swift` (`NapAlerts`) |
+| Deep links: `lulla://feed`, `lulla://diaper`, `lulla://history` | `App/LullaApp.swift` |
 
-Every write goes through `LullActions.perform` or `LogModel.mutate`. That
+Every write goes through `LullaActions.perform` or `LogModel.mutate`. That
 path takes a file lock (`flock`) and does a read-modify-write of the shared
 JSON. It then reloads widgets and controls, syncs Live Activities,
 reschedules the nap alert, and posts a Darwin notification so the open app

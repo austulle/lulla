@@ -15,30 +15,30 @@ struct OnboardingView: View {
 
             VStack(alignment: .leading, spacing: 0) {
                 HStack {
-                    MonoLabel("Lull", color: .lullForest)
+                    MonoLabel("Lulla", color: .lullaForest)
                     Spacer()
-                    MonoLabel("01", color: .lullForest)
+                    MonoLabel("01", color: .lullaForest)
                 }
                 .padding(.top, 12)
 
                 Spacer(minLength: 12)
 
-                OrbitMark(color: .lullForest)
+                OrbitMark(color: .lullaForest)
                     .frame(width: 150, height: 110)
                     .frame(maxWidth: .infinity)
 
                 Spacer(minLength: 12)
 
                 Text("Sleep, feeds,\nand the next\nnap window.")
-                    .font(.lullSerif(40))
-                    .foregroundStyle(Color.lullForest)
+                    .font(.lullaSerif(40))
+                    .foregroundStyle(Color.lullaForest)
                     .padding(.bottom, 18)
 
                 CreamPanel(padding: 18) {
                     VStack(alignment: .leading, spacing: 14) {
                         MonoLabel("About your baby")
                         TextField("Name", text: $name)
-                            .font(.lullSerif(24))
+                            .font(.lullaSerif(24))
                             .focused($nameFocused)
                             .submitLabel(.done)
                         DashedRule()
@@ -56,7 +56,7 @@ struct OnboardingView: View {
                             .padding(.top, 4)
                     }
                     .font(.system(size: 15))
-                    .tint(.lullInk)
+                    .tint(.lullaInk)
                 }
             }
             .padding(.horizontal, 16)
