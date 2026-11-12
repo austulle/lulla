@@ -1,0 +1,72 @@
+name: Lull
+options:
+  deploymentTarget:
+    iOS: "18.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    DEVELOPMENT_TEAM: Y3V978URTC
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    TARGETED_DEVICE_FAMILY: "1"
+targets:
+  Lull:
+    type: application
+    platform: iOS
+    sources: [App, Shared, Core]
+    dependencies:
+      - target: LullWidgets
+    scheme:
+      testTargets: [LullTests]
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: Lull
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        ITSAppUsesNonExemptEncryption: false
+        NSSupportsLiveActivities: true
+        UILaunchScreen:
+          UIColorName: AccentColor
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        CFBundleURLTypes:
+          - CFBundleURLName: com.lull.baby
+            CFBundleURLSchemes: [lull]
+    entitlements:
+      path: App/Lull.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.lull.baby]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lull.baby
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME: AccentColor
+  LullWidgets:
+    type: app-extension
+    platform: iOS
+    sources: [Widgets, Shared, Core]
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: Lull
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension
+    entitlements:
+      path: Widgets/LullWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.lull.baby]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.lull.baby.widgets
+  LullTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources: [Tests]
+    settings:
+      base:
+        GENERATE_INFOPLIST_FILE: true
+    dependencies:
+      - target: Lull
